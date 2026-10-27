@@ -1,0 +1,241 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Gerador de Imagens com IA</title><meta name="claude:viewport-fit-sides" content="cover"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Montserrat:wght@800&family=Playfair+Display:wght@700&family=Dancing+Script:wght@700&family=Fredoka:wght@600&display=swap"><link rel="stylesheet" href="css/style.css"></head><body>
+
+
+
+
+
+
+<div class="wrap">
+<header>
+  <div>
+    <h1 class="only-img">Gerador de <span>Imagens</span> de Produto</h1>
+    <h1 class="only-pessoa">Gerador de <span>Fotos</span> de Pessoa</h1>
+    <h1 class="only-video">Gerador de <span>Criativos</span> em Vídeo</h1>
+    <p class="sub only-img">Escolha o tipo de produto, ajuste a luz, o fundo e o ângulo vendo a prévia, e copie o prompt pronto no formato da IA que você usa: Gemini, ChatGPT, Midjourney, Leonardo, Ideogram ou outra. Não sabe o que é uma opção? Toque no <b>?</b>.</p>
+    <p class="sub only-pessoa">Melhore uma foto sua: foto de perfil profissional, Instagram, página de vendas ou ensaio. Escolha roupa, fundo e luz vendo a prévia e copie o prompt no formato da sua IA. A IA usa a sua foto de referência para manter o seu rosto. Não sabe o que é uma opção? Toque no <b>?</b>.</p>
+    <p class="sub only-video">Preencha o produto e os textos. Ele gera a imagem-referência e os prompts de cada clipe de 10 s, com o produto travado na referência, e confere tudo antes de você gastar crédito.</p>
+  </div>
+  <div class="seg" style="flex:0 1 auto;min-width:0">
+    <a class="btnlink" href="https://www.youtube.com/@Ludson_marques" target="_blank" rel="noopener">Ver o tutorial no YouTube</a>
+    <button id="btnExample" type="button">Carregar exemplo</button>
+    <button id="btnClear" type="button">Limpar</button>
+  </div>
+</header>
+
+<div class="grid">
+<!-- FORMULÁRIO -->
+<form class="panel" id="f" autocomplete="off">
+  <fieldset id="modeField">
+    <legend>O que você quer criar?</legend>
+    <div class="modeseg" id="modeseg"></div>
+  </fieldset>
+  <input type="hidden" id="mode" value="img">
+
+  <fieldset class="sep no-video" id="aiField">
+    <legend>1 · Em qual IA você vai gerar?</legend>
+    <div class="opt" id="g_ai"></div>
+  </fieldset>
+
+  <fieldset class="sep only-pessoa">
+    <legend>2 · Para que é a foto?</legend>
+    <div class="opt" id="g_pGoal"></div>
+  </fieldset>
+
+  <fieldset class="sep only-pessoa">
+    <legend>3 · A pessoa</legend>
+    <p class="ex" style="margin:0">Anexe na IA uma foto com o rosto bem visível, de frente e com boa luz. Ela é a referência para manter o rosto.</p>
+    <label>Como a pessoa é <small>Opcional. Ajuda nas IAs que não aceitam foto. Ex.: homem de 40 anos, cabelo curto grisalho, barba aparada.</small><textarea id="pDesc" rows="2"></textarea></label>
+  </fieldset>
+
+  <fieldset class="sep only-pessoa">
+    <legend>4 · Formato e enquadramento</legend>
+    <div class="opt" id="g_pFormat"></div>
+    <div class="opt" id="g_pFrame"></div>
+  </fieldset>
+
+  <fieldset class="sep only-pessoa">
+    <legend>5 · Roupa e expressão</legend>
+    <div class="opt" id="g_pOutfit"></div>
+    <div class="opt" id="g_pExpr"></div>
+  </fieldset>
+
+  <fieldset class="sep only-pessoa">
+    <legend>6 · Fundo</legend>
+    <div class="opt" id="g_pBg"></div>
+    <div class="opt" id="pBgColorWrap">
+      <div class="opthead">Cor do fundo</div>
+      <div class="swatches" id="swatchesP"></div>
+    </div>
+  </fieldset>
+
+  <fieldset class="sep only-pessoa">
+    <legend>7 · Luz e pele</legend>
+    <div class="opt" id="g_pLightColor"></div>
+    <div class="opt" id="g_pLight"></div>
+    <div class="opt" id="g_pRetouch"></div>
+  </fieldset>
+
+  <fieldset class="sep only-pessoa">
+    <legend>8 · Variações para testar</legend>
+    <div class="row">
+      <label>Quantas imagens<select id="pVar"><option value="1">Só 1</option><option value="2">2 (A/B)</option><option value="3">3</option><option value="4">4</option></select></label>
+      <label>Mudando só<select id="pVary"><option value="pBg">O fundo</option><option value="pOutfit">A roupa</option><option value="pLight">O tipo de luz</option><option value="pLightColor">A cor da luz</option></select></label>
+    </div>
+    <p class="ex" style="margin:0">Cada variação muda uma coisa só. Assim você compara e escolhe a melhor.</p>
+  </fieldset>
+
+  <fieldset class="sep only-img" id="presetField">
+    <legend>2 · O que você vai fotografar?</legend>
+    <div class="opt" id="g_preset"></div>
+  </fieldset>
+
+  <fieldset class="sep no-pessoa">
+    <legend><span class="only-img">3 · </span><span id="lgProd">Produto</span></legend>
+    <label><span id="lbNome">Nome do produto</span><input id="nome"></label>
+    <label><span id="lbVisual">Como o produto é visualmente</span> <small><span id="smVisual">Em inglês ou português. Cor, formato, material, o que está escrito no rótulo.</span> <span class="only-video">Isso vira o bloco travado em todos os clipes.</span><span class="only-img">Isso trava o produto em todas as variações.</span></small><textarea id="visual" rows="3"></textarea></label>
+    <label>Itens que aparecem junto <small>Opcional. Ex.: a caixa da embalagem, folhas de hortelã, um celular com a mesma capa.</small><input id="bonusVis"></label>
+  </fieldset>
+
+  <fieldset class="sep only-img">
+    <legend>4 · A foto</legend>
+    <div class="opt" id="g_imgFormat"></div>
+    <div class="opt" id="g_imgStyle"></div>
+    <div class="opt" id="g_imgAngle"></div>
+  </fieldset>
+
+  <fieldset class="sep only-img">
+    <legend>5 · Luz</legend>
+    <div class="opt" id="g_lightColor"></div>
+    <div class="opt" id="g_imgLight"></div>
+    <div class="opt" id="g_shadow"></div>
+  </fieldset>
+
+  <fieldset class="sep only-img">
+    <legend id="lgFundo">6 · Fundo e superfície</legend>
+    <div class="opt" id="g_bg"></div>
+    <div class="opt" id="bgColorWrap">
+      <div class="opthead">Cor do fundo</div>
+      <div class="swatches" id="swatches"></div>
+    </div>
+    <div id="cenaSlotImg"></div>
+    <div class="opt" id="g_surface"></div>
+    <div class="opt" id="g_depth"></div>
+  </fieldset>
+
+  <fieldset class="sep only-img">
+    <legend>7 · Variações para testar</legend>
+    <div class="row">
+      <label>Quantas imagens<select id="imgVar"><option value="1">Só 1</option><option value="2">2 (A/B)</option><option value="3">3</option><option value="4">4</option></select></label>
+      <label>Mudando só<select id="imgVary"><option value="lightColor">A cor da luz</option><option value="imgLight">O tipo de luz</option><option value="imgAngle">O ângulo</option><option value="bg">O fundo</option><option value="surface">A superfície</option></select></label>
+    </div>
+    <p class="ex" style="margin:0">Cada variação muda uma coisa só. Assim, quando uma imagem vender mais, você sabe o motivo.</p>
+  </fieldset>
+
+  <fieldset class="sep">
+    <legend><span class="only-img">8 · Texto na imagem</span><span class="only-pessoa">9 · Texto na imagem</span><span class="only-video">Textos do criativo</span></legend>
+    <div class="opt" id="g_textMode"></div>
+    <div id="txtWrap" style="display:flex;flex-direction:column;gap:14px">
+      <div class="opt no-video" id="g_txtParts"></div>
+      <label id="lbHook"><span><span class="only-video">Gancho</span><span class="no-video">Título</span></span> <small><span class="only-video">A primeira frase. Pergunta ou dor.</span><span class="no-video">A frase grande. Até 6 ou 7 palavras.</span></small><input id="hook"></label>
+      <label id="lbPromessa"><span><span class="only-video">Promessa</span><span class="no-video">Subtítulo</span></span> <small class="no-video">Uma linha menor, embaixo do título.</small><input id="promessa"></label>
+      <label class="only-video">Benefícios <small>Um por linha.</small><textarea id="benef" rows="3"></textarea></label>
+      <label id="lbOferta"><span><span class="only-video">Oferta / bônus</span><span class="no-video">Selo</span></span> <small class="no-video">Curto: "50% OFF", "Frete grátis".</small><input id="oferta"></label>
+      <label id="lbCta"><span><span class="only-video">CTA</span><span class="no-video">Botão</span></span> <small class="no-video">Ex.: "Compre agora", "Saiba mais".</small><input id="cta"></label>
+      <div class="opt no-video" id="g_imgTextPos"></div>
+      <div class="opt no-video" id="g_txtStyle"></div>
+      <div class="opt no-video" id="g_txtColor"></div>
+      <div class="opt no-video" id="g_txtBg"></div>
+      <div class="row">
+        <label><span class="only-video">Idioma do vídeo</span><span class="no-video">Idioma do texto</span><select id="lang"><option value="pt">Português (BR)</option><option value="es">Espanhol (LATAM)</option></select></label>
+        <label class="only-video">Clipes de 10 s<select id="clips"><option value="1">1 clipe · 10 s</option><option value="2">2 clipes · 20 s</option><option value="3">3 clipes · 30 s</option><option value="4">4 clipes · 40 s</option></select></label>
+      </div>
+    </div>
+  </fieldset>
+
+  <fieldset class="sep only-video" id="videoSceneField">
+    <legend>Cena e áudio</legend>
+    <div id="cenaSlotVid"></div>
+    <label>Áudio<select id="audio"><option value="music">Só música</option><option value="vo">Música + narração</option><option value="none">Sem áudio</option></select></label>
+    <label><span style="display:flex;gap:8px;align-items:center;flex-direction:row"><input type="checkbox" id="darkCta" style="width:auto"> Fundo escurece no CTA (último clipe)</span></label>
+  </fieldset>
+
+  <!-- cenário: compartilhado entre vídeo e fundo "ambiente" da imagem -->
+  <div id="cenaBox" style="display:flex;flex-direction:column;gap:10px">
+    <label>Cenário<select id="cena">
+      <option value="wood">Prateleira de madeira, parede bege, luz de janela</option>
+      <option value="studio">Estúdio escuro premium</option>
+      <option value="office">Mesa de escritório moderna</option>
+      <option value="bath">Banheiro claro (beleza)</option>
+      <option value="kitchen">Cozinha clara (comida)</option>
+      <option value="custom">Personalizado…</option>
+    </select></label>
+    <label id="cenaCustomWrap" hidden>Descreva o cenário<input id="cenaCustom"></label>
+  </div>
+
+  <!-- valores das escolhas de imagem -->
+  <input type="hidden" id="ai"><input type="hidden" id="preset">
+  <input type="hidden" id="textMode"><input type="hidden" id="imgTextPos"><input type="hidden" id="txtTitle"><input type="hidden" id="txtSub"><input type="hidden" id="txtBadge"><input type="hidden" id="txtCta">
+  <input type="hidden" id="txtStyle"><input type="hidden" id="txtColor"><input type="hidden" id="txtBg">
+  <input type="hidden" id="pGoal"><input type="hidden" id="pFormat"><input type="hidden" id="pFrame"><input type="hidden" id="pOutfit"><input type="hidden" id="pExpr">
+  <input type="hidden" id="pBg"><input type="hidden" id="pBgColor"><input type="hidden" id="pLight"><input type="hidden" id="pLightColor"><input type="hidden" id="pRetouch"><input type="hidden" id="imgFormat"><input type="hidden" id="imgStyle"><input type="hidden" id="imgAngle">
+  <input type="hidden" id="lightColor"><input type="hidden" id="imgLight"><input type="hidden" id="shadow">
+  <input type="hidden" id="bg"><input type="hidden" id="bgColor"><input type="hidden" id="surface"><input type="hidden" id="depth">
+</form>
+
+<!-- RESULTADO -->
+<div style="display:flex;flex-direction:column;gap:20px;min-width:0">
+  <section class="panel no-video">
+    <h2>Prévia da composição</h2>
+    <div class="previewbox">
+      <div id="bigPreview"></div>
+      <div style="display:flex;flex-direction:column;gap:10px;min-width:0">
+        <ul class="recipe" id="recipe"></ul>
+        <p class="note" style="margin:0">É um esboço para você entender as escolhas. A imagem de verdade quem faz é a IA, a partir da sua foto.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel only-video">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap">
+      <h2>Linha do tempo</h2><span class="takehead m" id="tlMeta" style="background:none;border:0;padding:0"></span>
+    </div>
+    <div class="timeline" id="timeline"></div>
+  </section>
+
+  <section class="panel">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap">
+      <h2>Antes de gastar crédito</h2><span class="verdict" id="verdict"></span>
+    </div>
+    <ul class="checks" id="checks"></ul>
+  </section>
+
+  <section class="panel">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+      <h2>Prompts</h2>
+      <div class="seg"><button type="button" id="copyAll" class="primary">Copiar tudo</button></div>
+    </div>
+    <ol class="steps" id="steps"></ol>
+    <div id="takes" style="display:flex;flex-direction:column;gap:14px"></div>
+  </section>
+
+  <section class="panel">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+      <h2>Biblioteca de aprovados</h2>
+      <button type="button" id="saveLib">Salvar este como aprovado</button>
+    </div>
+    <p class="ex" style="margin:0">Salve só o que deu certo na IA. Para variar, carregue um aprovado e mude uma coisa só. Fica salvo neste navegador.</p>
+    <div class="lib" id="lib"></div>
+  </section>
+</div>
+</div>
+
+<footer>
+  <span>Gerador gratuito do canal <a href="https://www.youtube.com/@Ludson_marques" target="_blank" rel="noopener">@Ludson_marques</a>. Os prompts funcionam no Gemini, ChatGPT, Midjourney, Leonardo, Ideogram e outras IAs de imagem.</span>
+  <span>Novos módulos chegam junto com os próximos vídeos.</span>
+</footer>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<script src="js/app.js"></script>
+
+</body></html>
