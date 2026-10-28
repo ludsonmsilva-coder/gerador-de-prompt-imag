@@ -116,8 +116,9 @@ const PRESETS={
 const KIND_G={
   carro:{
     imgStyle:{label:"Tipo de foto",
-      help:"Parado é a foto clássica de anúncio de revenda. Em movimento mostra o carro andando, com as rodas e o fundo borrados (foto 'panning'). Detalhe mostra roda, farol ou grade de perto. Interior mostra painel, volante e bancos.",
-      opts:{estatico:{l:"Parado",d:"O carro inteiro, parado. A foto principal do anúncio.",p:"the car parked and standing still as the clear focal point, the whole vehicle in frame"},
+      help:"Melhorar minha foto é para revenda e garagem: você manda a foto que já tirou do carro no pátio e a IA só deixa ela profissional, sem trocar o carro nem o ângulo. Parado é a foto clássica de anúncio de revenda. Em movimento mostra o carro andando, com as rodas e o fundo borrados (foto 'panning'). Detalhe mostra roda, farol ou grade de perto. Interior mostra painel, volante e bancos.",
+      opts:{melhorar:{l:"Melhorar minha foto",d:"Para revenda: usa a sua foto do pátio. Mesmo carro e mesmo ângulo, só fica com cara de profissional.",p:"the same photo of the car, professionally enhanced"},
+            estatico:{l:"Parado",d:"O carro inteiro, parado. A foto principal do anúncio.",p:"the car parked and standing still as the clear focal point, the whole vehicle in frame"},
             movimento:{l:"Em movimento",d:"Rodas e fundo borrados, carro nítido. Passa velocidade.",p:"the car driving, panning shot: the car body sharp while the wheels and background show motion blur"},
             detalhe:{l:"Detalhe",d:"Roda, farol ou grade de perto. Boa 2ª ou 3ª foto.",p:"close-up detail shot of the car (wheel, headlight and front grille), the paint and materials filling most of the frame"},
             interior:{l:"Interior",d:"Painel, volante e bancos. Mostra acabamento.",p:"interior shot from the center of the back seat looking forward, showing the dashboard, steering wheel, center screen and front seats"}}},
@@ -141,8 +142,9 @@ const KIND_G={
             marcada:{l:"Marcada",d:"Sombra nítida, de sol forte.",p:"crisp cast shadow from direct sunlight"},
             nenhuma:{l:"Bem leve",d:"Só a sombra dos pneus. Visual de catálogo.",p:"very light shadow, only a thin dark contact under the tires"}}},
     bg:{label:"Cenário",
-      help:"Onde o carro está. Showroom e estúdio são os mais usados por revenda e concessionária. Cidade à noite e estrada contam uma história e funcionam bem em anúncio de redes sociais. Garagem de casa passa a ideia de 'o carro na sua garagem'.",
-      opts:{showroom:{l:"Showroom",d:"Loja clara com vidros. Cara de concessionária.",p:"a bright modern car dealership showroom with large glass windows"},
+      help:"Onde o carro está. Em Melhorar minha foto, Manter o lugar da foto deixa o mesmo pátio ou garagem, só mais limpo; as outras opções trocam o fundo. Showroom e estúdio são os mais usados por revenda e concessionária. Cidade à noite e estrada contam uma história e funcionam bem em anúncio de redes sociais. Garagem de casa passa a ideia de 'o carro na sua garagem'.",
+      opts:{manter:{l:"Manter o lugar da foto",d:"O mesmo pátio ou garagem da sua foto, só mais limpo e arrumado.",p:"the same location as in the original photo"},
+            showroom:{l:"Showroom",d:"Loja clara com vidros. Cara de concessionária.",p:"a bright modern car dealership showroom with large glass windows"},
             estudio:{l:"Estúdio escuro",d:"Fundo preto, painel de luz em cima. Premium.",p:"a dark seamless automotive photo studio with a large overhead light panel"},
             estudioclaro:{l:"Estúdio branco",d:"Fundo branco infinito. Catálogo.",p:"a seamless white automotive studio cyclorama, no visible horizon"},
             solid:{l:"Cor sólida",d:"Estúdio de uma cor. Combine com a marca da loja.",p:""},
@@ -198,6 +200,15 @@ const KIND_G={
 const KIND_HIDE={imovel:["shadow","depth"],carro:[],produto:[]};
 const KIND_NOUN={produto:"produto",carro:"carro",imovel:"imóvel"};
 const kindOf=s=>(s.preset==="carro"||s.preset==="imovel")?s.preset:"produto";
+/* Carro em "Melhorar minha foto": o ângulo vem da foto; mantendo o lugar, o chão e a luz também. */
+const carFix=s=>kindOf(s)==="carro"&&s.imgStyle==="melhorar";
+function hideOf(s){
+  const h=[...KIND_HIDE[kindOf(s)]];
+  if(carFix(s)){h.push("imgAngle");if(s.bg==="manter")h.push("surface","imgLight","shadow","depth")}
+  return h;
+}
+/* opções que só existem em certas escolhas */
+const optOk=(s,key,v)=>!(key==="bg"&&v==="manter"&&kindOf(s)==="carro"&&!carFix(s));
 const gOf=(s,k)=>((KIND_G[kindOf(s)]||{})[k])||G[k];
 const PROD_DEF={imgStyle:"hero",imgAngle:"threeq",imgLight:"window",shadow:"suave",bg:"white",surface:"infinito",depth:"desfocado"};
 /* Corrige escolhas que não existem para o tipo (ex.: carro com mármore vindo de um aprovado antigo). Devolve o que trocou. */
@@ -205,7 +216,7 @@ function normalizeKind(s){
   const k=kindOf(s), def=k==="produto"?PROD_DEF:PRESETS[k], fixed=[];
   ["imgStyle","imgAngle","imgLight","shadow","bg","surface","depth"].forEach(key=>{
     const g=gOf(s,key);
-    if(!g.opts[s[key]]){const old=s[key];s[key]=def[key];const el=$(key);if(el)el.value=def[key];if(old)fixed.push([key,old])}
+    if(!g.opts[s[key]]||!optOk(s,key,s[key])){const old=s[key];s[key]=def[key];const el=$(key);if(el)el.value=def[key];if(old)fixed.push([key,old])}
   });
   return fixed;
 }
@@ -666,6 +677,7 @@ function drawCar(s,o={}){
     case "showroom":bg=`<rect width="${W}" height="${H}" fill="#E4E7EA"/><g ${bl}>${[0,1,2,3,4].map(i=>`<rect x="${1+i*20}" y="${horizon-span*.42}" width="18" height="${span*.42}" fill="#F7FAFD" stroke="#BCC3CB" stroke-width=".7"/>`).join("")}<rect x="0" y="${horizon-span*.46}" width="100" height="${span*.04}" fill="#C3C9D0"/><ellipse cx="18" cy="${horizon-span*.12}" rx="5" ry="${span*.1}" fill="#9DB596"/></g>`;break;
     case "estudio":bg=`<rect width="${W}" height="${H}" fill="#15171C"/><rect x="14" y="${Math.max(1,zy0+span*.06)}" width="72" height="5" rx="1.5" fill="#F4F6F8" opacity=".92" ${bl}/><ellipse cx="50" cy="${horizon}" rx="46" ry="${span*.16}" fill="#2A2E36" ${bl}/>`;break;
     case "estudioclaro":bg=`<rect width="${W}" height="${H}" fill="#F5F5F3"/>`;break;
+    case "manter":bg=`<rect width="${W}" height="${H}" fill="url(#${id}sky)"/><g ${bl}><rect x="0" y="${horizon-span*.3}" width="100" height="${span*.3}" fill="#D8D2C6"/><rect x="0" y="${horizon-span*.34}" width="100" height="${span*.05}" fill="#B0402F"/><rect x="8" y="${horizon-span*.22}" width="22" height="${span*.14}" fill="#F3F1EC"/><rect x="62" y="${horizon-span*.24}" width="30" height="${span*.24}" fill="#7E8791"/></g>`;break;
     case "solid":bg=`<rect width="${W}" height="${H}" fill="${bgc}"/><ellipse cx="50" cy="${horizon}" rx="44" ry="${span*.14}" fill="${shade(bgc,.2)}" ${`filter="url(#${id}b)"`}/>`;break;
     case "urbano":bg=`<rect width="${W}" height="${H}" fill="#18203A"/><g ${bl}>${[[0,22,"#252E4A"],[18,34,"#2D3756"],[40,26,"#222B45"],[62,38,"#2A3352"],[82,28,"#243050"]].map(([x,h,c])=>`<rect x="${x}" y="${horizon-span*h/100*1.4}" width="20" height="${span*h/100*1.4}" fill="${c}"/>`).join("")}${[[8,.3,"#F5C26B"],[26,.2,"#9DB7E0"],[47,.35,"#E88F6A"],[70,.25,"#F5C26B"],[90,.32,"#9DB7E0"],[58,.15,"#F2E2B8"]].map(([x,y,c],i)=>`<circle cx="${x}" cy="${zy0+span*y}" r="${2.5+i%3}" fill="${c}" opacity=".9"/>`).join("")}</g>`;break;
     case "estrada":bg=`<rect width="${W}" height="${H}" fill="url(#${id}sky)"/><g ${bl}><path d="M0 ${horizon} Q20 ${horizon-span*.16} 42 ${horizon-span*.05} T100 ${horizon-span*.1} L100 ${horizon+1} L0 ${horizon+1} Z" fill="#7C9C68"/><path d="M0 ${horizon} Q35 ${horizon-span*.08} 60 ${horizon} L0 ${horizon+1} Z" fill="#5E8051"/></g>`;break;
@@ -842,14 +854,14 @@ function drawHouse(s,o={}){
 
 /* ===== componentes de escolha ===== */
 function renderGroups(s,keys){
-  const hide=s.mode==="img"?KIND_HIDE[kindOf(s)]:[];
+  const hide=s.mode==="img"?hideOf(s):[];
   keys.filter(k=>G[k]).forEach(key=>{
     const g=s.mode==="img"?gOf(s,key):G[key];
     const box=$("g_"+key); if(!box)return;
     box.hidden=hide.includes(key); if(box.hidden)return;
     const open=box.dataset.open==="1";
     const cur=s[key];
-    const chips=Object.entries(g.opts).map(([v,o])=>{
+    const chips=Object.entries(g.opts).filter(([v])=>s.mode!=="img"||optOk(s,key,v)).map(([v,o])=>{
       let thumb="";
       if(g.draw==="t"){
         thumb=drawTextThumb(s,key,v);
@@ -883,6 +895,10 @@ document.addEventListener("click",e=>{
     if(G[k]&&G[k].multi){$(v).value=$(v).value==="1"?"":"1";render();return}
     $(k).value=v;
     if(k==="imgStyle"&&v==="flatlay")$("imgAngle").value="top";
+    if(k==="imgStyle"&&$("preset").value==="carro"){
+      if(v==="melhorar"){$("bg").value="manter";$("imgLight").value="nublado"}
+      else if($("bg").value==="manter")$("bg").value="showroom";
+    }
     render();return;
   }
   const h=e.target.closest("[data-help]");
@@ -1051,6 +1067,8 @@ function imgVariants(s){
       let keys=kd==="produto"?VARY_KEYS[s.imgVary]:Object.keys(gOf(s,s.imgVary).opts);
       if(kd==="produto"&&s.imgVary==="imgAngle"&&s.imgStyle==="flatlay")keys=["top","macro"];
       if(kd==="imovel"&&s.imgVary==="imgAngle"&&s.imgStyle!=="fachada")keys=keys.filter(k=>k!=="drone");
+      if(kd==="carro"&&s.imgVary==="bg")keys=keys.filter(k=>optOk(s,"bg",k));
+      if(hideOf(s).includes(s.imgVary))keys=[s[s.imgVary]];
       if(kd==="carro"&&s.imgVary==="surface"&&["estudio","estudioclaro","solid","showroom"].includes(s.bg))keys=keys.filter(k=>k!=="terra"&&k!=="asfalto");
       if(kd==="carro"&&s.imgVary==="surface"&&["estrada","urbano","garagem"].includes(s.bg))keys=keys.filter(k=>k!=="concreto"&&k!=="estudio");
       v[s.imgVary]=rot(keys,keys.includes(s[s.imgVary])?s[s.imgVary]:keys[0],i);
@@ -1086,6 +1104,7 @@ function staticPrompt(s){
 const cap=t=>t[0].toUpperCase()+t.slice(1);
 function carBg(s){return s.bg==="solid"?`a seamless solid ${(BGCOLORS[s.bgColor]||BGCOLORS.cinza).p} automotive studio cyclorama`:KIND_G.carro.bg.opts[s.bg].p}
 function carPrompt(s){
+  if(carFix(s))return carFixPrompt(s);
   const K=KIND_G.carro, x=txtZoneInfo(s), bonus=clean(s.bonusVis), sepNeg=s.ai==="leonardo"||s.ai==="ideogram";
   const inside=s.imgStyle==="interior", detail=s.imgStyle==="detalhe";
   const st=K.imgStyle.opts[s.imgStyle].p, ang=K.imgAngle.opts[s.imgAngle].p, li=K.imgLight.opts[s.imgLight].p, lc=G.lightColor.opts[s.lightColor].p;
@@ -1113,6 +1132,33 @@ function carPrompt(s){
   P.push(`FOCUS: ${K.depth.opts[s.depth].p}.`);
   P.push(`STYLE: high-end automotive photography, clean glossy paint with realistic reflections, accurate proportions and panel gaps, sharp detail.`);
   if(!inside&&!detail)P.push(`LICENSE PLATE: blank or softly blurred, no readable numbers.`);
+  P.push(...textLines(s,x));
+  if(!sepNeg)P.push(`AVOID: ${avoid.join(", ")}.`);
+  return {p:P.join("\n"),neg:sepNeg?avoid.join(", "):""};
+}
+/* Revenda: melhora a foto real do carro, sem trocar o carro nem esconder defeito. */
+function carFixPrompt(s){
+  const K=KIND_G.carro, x=txtZoneInfo(s), sepNeg=s.ai==="leonardo"||s.ai==="ideogram";
+  const keep=s.bg==="manter", lc=G.lightColor.opts[s.lightColor].p, li=K.imgLight.opts[s.imgLight].p;
+  const avoid=["changing the car model, color or design","changing the wheels, trim or badges","adding accessories","hiding or removing real scratches, dents, rust or wear","changing the camera angle","cropping the car","warped body panels","a CGI or render look","readable license plate numbers","people","watermarks"].concat(x.wantText?["extra or garbled text"]:["text"]);
+  if(s.ai==="midjourney"){
+    const ar={"45":"4:5","916":"9:16","11":"1:1"}[s.imgFormat];
+    const bits=[`professional automotive dealership photo of ${prodOf(s)}, same car and same angle as the reference photo`,
+      keep?"same location, tidied and clean":carBg(s),keep?"":`on ${K.surface.opts[s.surface].p}`,keep?"natural daylight, balanced exposure":li,lc,
+      "clean washed car, glossy paint with realistic reflections, sharp detail, true-to-life colors"];
+    return {p:`${bits.filter(Boolean).join(", ")} --ar ${ar} --style raw --no people, watermark, text, license plate numbers`,neg:""};
+  }
+  const P=[`Edit the attached photo of the car. This is a photo enhancement for a car dealership listing: improve the photo, do not create a new car.`];
+  P.push(`KEEP EXACTLY THE SAME: the car (${prodOf(s)}): make, model, body shape, paint color, wheels, headlights, grille, badges and trim. Keep the same camera angle, perspective and framing as the original photo.`);
+  P.push(`HONESTY: keep any real scratch, dent, rust or wear exactly as it is. Only remove dirt, dust, water spots and mud.`);
+  P.push(keep
+    ?`LOCATION: keep the same place as in the original photo, only tidied: remove trash, cones, hoses, stray objects, people and other cars cut off at the edges of the frame. Clean ground, no stains or puddles.`
+    :`BACKGROUND: replace the background with ${carBg(s)}. GROUND: ${K.surface.opts[s.surface].p}. Match the perspective, horizon line and light direction of the original photo so the car sits naturally on the ground.`);
+  if(!keep)P.push(`SHADOW: ${K.shadow.opts[s.shadow].p}.`);
+  P.push(`CAR: freshly washed look, glossy paint with natural reflections, clean glass, black tires, clean wheels. Reduce distracting reflections of the photographer, buildings or other cars on the paint and windows.`);
+  P.push(`LIGHT: ${keep?"keep the natural light of the original photo, brighter and balanced, recover detail in shadows and highlights":li}. ${cap(lc)}. The paint color must match the real car.`);
+  P.push(`QUALITY: straighten the horizon, sharpen detail, remove noise and blur, high resolution, ${fmtFor(s)} format. If the format is different from the original, extend the scene naturally around the car, never crop the car.`);
+  P.push(`LICENSE PLATE: blank or softly blurred, no readable numbers.`);
   P.push(...textLines(s,x));
   if(!sepNeg)P.push(`AVOID: ${avoid.join(", ")}.`);
   return {p:P.join("\n"),neg:sepNeg?avoid.join(", "):""};
@@ -1152,6 +1198,14 @@ function housePrompt(s){
 }
 function carChecks(s){
   const C=[], st=["estudio","estudioclaro","solid","showroom"].includes(s.bg), out=["estrada","urbano","garagem"].includes(s.bg);
+  if(carFix(s)){
+    C.push(["ok","Mesmo carro e mesmo ângulo da sua foto. A IA só limpa, corrige luz e cor"+(s.bg==="manter"?" e arruma o pátio.":" e troca o fundo.")]);
+    C.push(["ok","O prompt tira sujeira, mas não esconde risco nem amassado: o anúncio mostra o carro real e evita reclamação do cliente."]);
+    if(!clean(s.visual))C.push(["warn","Escreva marca, modelo, ano e cor. Ajuda a IA a não mudar detalhes do carro."]);
+    if(s.ai==="midjourney"||s.ai==="ideogram"||s.ai==="leonardo")C.push(["crit","Para melhorar a foto real, use Gemini ou ChatGPT com a foto anexada. Essa IA cria um carro novo em vez de editar o seu."]);
+    if(s.bg!=="manter"&&s.imgLight==="noite"&&s.bg!=="urbano"&&s.bg!=="estudio")C.push(["warn","Luz de noite numa foto tirada de dia costuma ficar artificial. Prefira dia nublado ou estúdio."]);
+    return C;
+  }
   if(!clean(s.visual))C.push(["crit","Descreva o carro: marca, modelo, ano e cor. Sem isso a IA inventa outro carro."]);
   else C.push(["ok","Carro descrito e travado igual em todas as variações."]);
   if(s.imgStyle!=="interior")C.push(["ok","O prompt trava o carro em tamanho real, com os 4 pneus no chão, e proíbe mesa, madeira e mármore."]);
@@ -1274,9 +1328,10 @@ function renderImg(s){
   const R=[["IA",G.ai.opts[s.ai].l],[kd==="imovel"?"Mostrar":"Cena",L("imgStyle").opts[s.imgStyle].l],["Ângulo",L("imgAngle").opts[s.imgAngle].l],["Luz",L("imgLight").opts[s.imgLight].l+", "+G.lightColor.opts[s.lightColor].l.toLowerCase()],
     [L("bg").label,L("bg").opts[s.bg].l+(["solid","gradient","blur"].includes(s.bg)?" "+BGCOLORS[s.bgColor].l:"")+(s.bg==="scene"?" ("+(SCENE_L[s.cena]||"personalizado")+")":"")],
     [kd==="produto"?"Superfície":L("surface").label,L("surface").opts[s.surface].l]]
-    .concat(KIND_HIDE[kd].includes("shadow")?[]:[["Sombra",L("shadow").opts[s.shadow].l]])
-    .concat(KIND_HIDE[kd].includes("depth")?[]:[["Foco",L("depth").opts[s.depth].l]])
+    .concat(hideOf(s).includes("shadow")?[]:[["Sombra",L("shadow").opts[s.shadow].l]])
+    .concat(hideOf(s).includes("depth")?[]:[["Foco",L("depth").opts[s.depth].l]])
     .concat([["Texto",textSummary(s)]]);
+  if(carFix(s)){const hf=hideOf(s);for(let i=R.length-1;i>=0;i--){const a=R[i][0];if((a==="Ângulo"&&hf.includes("imgAngle"))||(a===L("surface").label&&hf.includes("surface")))R.splice(i,1);else if(a==="Luz"&&hf.includes("imgLight"))R[i][1]="A da foto, corrigida, "+G.lightColor.opts[s.lightColor].l.toLowerCase()}}
   $("recipe").innerHTML=R.map(([a,b])=>`<li><span>${a}</span><span>${esc(b)}</span></li>`).join("");
   drawChecks(imgChecks(s,fixed));
   const vs=imgVariants(s), n=vs.length;
@@ -1289,7 +1344,7 @@ function renderImg(s){
     ideogram:[`Escolha a proporção ${fl} e, se o seu plano permitir, envie a foto do ${noun} como referência.`,`Cole a Variação A no prompt e o negative prompt no campo separado, se aparecer.`],
     outra:[`Se a IA aceitar foto, anexe a foto do ${noun} como referência. Escolha a proporção ${fl}, se houver essa opção.`,`Cole a Variação A. Se a IA tiver campo de “negative prompt”, cole ali o que está na linha AVOID.`],
   };
-  const steps=[{produto:`Tire uma foto do produto com o celular, com boa luz e fundo limpo.`,carro:`Fotografe o carro inteiro com o celular, de dia, limpo e no mesmo ângulo que escolheu.`,imovel:`Fotografe ${s.imgStyle==="fachada"?"a frente do imóvel":"o ambiente"} com o celular na horizontal e reto, na altura do peito, com as janelas abertas.`}[kd],...BY_AI[s.ai]];
+  const steps=[{produto:`Tire uma foto do produto com o celular, com boa luz e fundo limpo.`,carro:carFix(s)?`Separe a foto do carro que você já tirou no pátio, na maior resolução que tiver (mande como arquivo, não print do WhatsApp).`:`Fotografe o carro inteiro com o celular, de dia, limpo e no mesmo ângulo que escolheu.`,imovel:`Fotografe ${s.imgStyle==="fachada"?"a frente do imóvel":"o ambiente"} com o celular na horizontal e reto, na altura do peito, com as janelas abertas.`}[kd],...BY_AI[s.ai]];
   if(n>1)steps.push(`Gere ${n>2?"as outras variações":"a Variação B"} do mesmo jeito, com a mesma foto, e compare.`);
   if(s.textMode==="edit")steps.push(`No Canva, escreva os textos no espaço livre com a fonte ${G.txtStyle.opts[s.txtStyle].canva}.`);
   steps.push(`Deu certo? Salve na biblioteca abaixo.`);
