@@ -1140,7 +1140,7 @@ function carPrompt(s){
 function carFixPrompt(s){
   const K=KIND_G.carro, x=txtZoneInfo(s), sepNeg=s.ai==="leonardo"||s.ai==="ideogram";
   const keep=s.bg==="manter", lc=G.lightColor.opts[s.lightColor].p, li=K.imgLight.opts[s.imgLight].p;
-  const avoid=["changing the car model, color or design","changing the wheels, trim or badges","adding accessories","hiding or removing real scratches, dents, rust or wear","changing the camera angle","cropping the car","warped body panels","a CGI or render look","readable license plate numbers","people","watermarks"].concat(x.wantText?["extra or garbled text"]:["text"]);
+  const avoid=["changing the car model, color or design","changing the wheels, trim or badges","adding accessories","hiding or removing real scratches, dents, rust or wear","changing the camera angle","cropping the car","warped body panels","a CGI or render look","readable license plate numbers","people","watermarks"].concat(keep?["removing or changing the store name, logo or signs on the walls"]:[]).concat(x.wantText?["extra or garbled text"]:["adding any new text"]);
   if(s.ai==="midjourney"){
     const ar={"45":"4:5","916":"9:16","11":"1:1"}[s.imgFormat];
     const bits=[`professional automotive dealership photo of ${prodOf(s)}, same car and same angle as the reference photo`,
@@ -1152,14 +1152,14 @@ function carFixPrompt(s){
   P.push(`KEEP EXACTLY THE SAME: the car (${prodOf(s)}): make, model, body shape, paint color, wheels, headlights, grille, badges and trim. Keep the same camera angle, perspective and framing as the original photo.`);
   P.push(`HONESTY: keep any real scratch, dent, rust or wear exactly as it is. Only remove dirt, dust, water spots and mud.`);
   P.push(keep
-    ?`LOCATION: keep the same place as in the original photo, only tidied: remove trash, cones, hoses, stray objects, people and other cars cut off at the edges of the frame. Clean ground, no stains or puddles.`
+    ?`LOCATION: keep the same place as in the original photo, only tidied: remove trash, cones, hoses, stray objects, people and other cars cut off at the edges of the frame. Clean ground, no stains or puddles.\nSTORE BRANDING: keep the dealership's name, logo and painted signs on the walls exactly as they are in the original photo: same position, same letters and colors, sharp and readable. They are part of the location, not added text.`
     :`BACKGROUND: replace the background with ${carBg(s)}. GROUND: ${K.surface.opts[s.surface].p}. Match the perspective, horizon line and light direction of the original photo so the car sits naturally on the ground.`);
   if(!keep)P.push(`SHADOW: ${K.shadow.opts[s.shadow].p}.`);
   P.push(`CAR: freshly washed look, glossy paint with natural reflections, clean glass, black tires, clean wheels. Reduce distracting reflections of the photographer, buildings or other cars on the paint and windows.`);
   P.push(`LIGHT: ${keep?"keep the natural light of the original photo, brighter and balanced, recover detail in shadows and highlights":li}. ${cap(lc)}. The paint color must match the real car.`);
   P.push(`QUALITY: straighten the horizon, sharpen detail, remove noise and blur, high resolution, ${fmtFor(s)} format. If the format is different from the original, extend the scene naturally around the car, never crop the car.`);
   P.push(`LICENSE PLATE: blank or softly blurred, no readable numbers.`);
-  P.push(...textLines(s,x));
+  P.push(...(s.textMode==="none"?[`TEXT: do not add any new text, letters or logos.${keep?" Keep the existing store name and logo on the walls.":""}`]:textLines(s,x)));
   if(!sepNeg)P.push(`AVOID: ${avoid.join(", ")}.`);
   return {p:P.join("\n"),neg:sepNeg?avoid.join(", "):""};
 }
@@ -1199,7 +1199,7 @@ function housePrompt(s){
 function carChecks(s){
   const C=[], st=["estudio","estudioclaro","solid","showroom"].includes(s.bg), out=["estrada","urbano","garagem"].includes(s.bg);
   if(carFix(s)){
-    C.push(["ok","Mesmo carro e mesmo ângulo da sua foto. A IA só limpa, corrige luz e cor"+(s.bg==="manter"?" e arruma o pátio.":" e troca o fundo.")]);
+    C.push(["ok","Mesmo carro e mesmo ângulo da sua foto. A IA só limpa, corrige luz e cor"+(s.bg==="manter"?" e arruma o pátio, mantendo o nome e a logo da loja na parede.":" e troca o fundo.")]);
     C.push(["ok","O prompt tira sujeira, mas não esconde risco nem amassado: o anúncio mostra o carro real e evita reclamação do cliente."]);
     if(!clean(s.visual))C.push(["warn","Escreva marca, modelo, ano e cor. Ajuda a IA a não mudar detalhes do carro."]);
     if(s.ai==="midjourney"||s.ai==="ideogram"||s.ai==="leonardo")C.push(["crit","Para melhorar a foto real, use Gemini ou ChatGPT com a foto anexada. Essa IA cria um carro novo em vez de editar o seu."]);
