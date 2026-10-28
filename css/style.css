@@ -127,3 +127,9 @@ body[data-mode="video"] .no-video{display:none!important}
 body[data-mode="pessoa"] .no-pessoa{display:none!important}
 .modeseg{display:grid;grid-template-columns:1fr 1fr;gap:6px}
 .modeseg button{padding:11px 12px;font-size:14px}
+
+/* prévia fica visível enquanto rola o formulário (telas largas) */
+@media (min-width:901px){
+  .grid > div:last-child{align-self:stretch}
+  .grid > div:last-child > section.no-video{position:sticky;top:12px;z-index:5;box-shadow:0 10px 24px -8px rgba(0,0,0,.45)}
+}
