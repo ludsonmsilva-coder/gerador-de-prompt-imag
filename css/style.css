@@ -134,3 +134,8 @@ body[data-mode="pessoa"] .no-pessoa{display:none!important}
   /* só fica fixa enquanto o mouse está no formulário; ao ir para os prompts, ela sai da frente */
   .grid:has(#f:hover) > div:last-child > section.no-video{position:sticky;top:12px;z-index:5;box-shadow:0 10px 24px -8px rgba(0,0,0,.45)}
 }
+
+/* retoque estilo Photoshop: esconde o que não muda */
+body[data-ps="1"] .ps-hide{display:none!important}
+.ps-only{display:none}
+body[data-ps="1"] .ps-only{display:inline}

@@ -47,19 +47,19 @@
     <label>Como a pessoa é <small>Opcional. Ajuda nas IAs que não aceitam foto. Ex.: homem de 40 anos, cabelo curto grisalho, barba aparada.</small><textarea id="pDesc" rows="2"></textarea></label>
   </fieldset>
 
-  <fieldset class="sep only-pessoa">
+  <fieldset class="sep only-pessoa ps-hide">
     <legend>4 · Formato e enquadramento</legend>
     <div class="opt" id="g_pFormat"></div>
     <div class="opt" id="g_pFrame"></div>
   </fieldset>
 
-  <fieldset class="sep only-pessoa">
+  <fieldset class="sep only-pessoa ps-hide">
     <legend>5 · Roupa e expressão</legend>
     <div class="opt" id="g_pOutfit"></div>
     <div class="opt" id="g_pExpr"></div>
   </fieldset>
 
-  <fieldset class="sep only-pessoa">
+  <fieldset class="sep only-pessoa ps-hide">
     <legend>6 · Fundo</legend>
     <div class="opt" id="g_pBg"></div>
     <div class="opt" id="pBgColorWrap">
@@ -69,13 +69,13 @@
   </fieldset>
 
   <fieldset class="sep only-pessoa">
-    <legend>7 · Luz e pele</legend>
-    <div class="opt" id="g_pLightColor"></div>
-    <div class="opt" id="g_pLight"></div>
+    <legend><span class="ps-hide">7 · Luz e pele</span><span class="ps-only">4 · Pele</span></legend>
+    <div class="opt ps-hide" id="g_pLightColor"></div>
+    <div class="opt ps-hide" id="g_pLight"></div>
     <div class="opt" id="g_pRetouch"></div>
   </fieldset>
 
-  <fieldset class="sep only-pessoa">
+  <fieldset class="sep only-pessoa ps-hide">
     <legend>8 · Variações para testar</legend>
     <div class="row">
       <label>Quantas imagens<select id="pVar"><option value="1">Só 1</option><option value="2">2 (A/B)</option><option value="3">3</option><option value="4">4</option></select></label>
@@ -132,7 +132,7 @@
   </fieldset>
 
   <fieldset class="sep">
-    <legend><span class="only-img">8 · Texto na imagem</span><span class="only-pessoa">9 · Texto na imagem</span><span class="only-video">Textos do criativo</span></legend>
+    <legend><span class="only-img">8 · Texto na imagem</span><span class="only-pessoa"><span class="ps-hide">9 · Texto na imagem</span><span class="ps-only">5 · Texto na imagem (opcional)</span></span><span class="only-video">Textos do criativo</span></legend>
     <div class="opt" id="g_textMode"></div>
     <div id="txtWrap" style="display:flex;flex-direction:column;gap:14px">
       <div class="opt no-video" id="g_txtParts"></div>

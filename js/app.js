@@ -225,13 +225,14 @@ const OLD_L={marmore:"mármore",madeira:"madeira",tecido:"tecido",pedra:"pedra",
 /* ===== FOTO DE PESSOA: opções ===== */
 Object.assign(G,{
   pGoal:{label:"Objetivo",text:true,
-    help:"Um atalho. Escolha para que vai usar a foto e o gerador marca enquadramento, roupa, fundo e luz que combinam. Depois você muda o que quiser.",
+    help:"Um atalho. Escolha para que vai usar a foto e o gerador marca enquadramento, roupa, fundo e luz que combinam. Depois você muda o que quiser. Retoque estilo Photoshop é diferente: não cria foto nova, só edita a sua, igual a um editor profissional, sem mexer no rosto.",
     opts:{
       linkedin:{l:"Perfil profissional",d:"LinkedIn, currículo, crachá. Rosto e ombros, blazer, fundo de estúdio.",p:"a professional headshot for LinkedIn and a résumé"},
       redes:{l:"Instagram / WhatsApp",d:"Foto de perfil leve e simpática, fundo verde desfocado.",p:"a friendly profile picture for Instagram and WhatsApp"},
       autoridade:{l:"Página de vendas",d:"Meio corpo, casual elegante, escritório ao fundo. Passa autoridade.",p:"an authority portrait for a sales page and social media posts"},
       ensaio:{l:"Ensaio estilo revista",d:"Luz dramática, fundo escuro, olhar confiante.",p:"an editorial magazine-style portrait"},
       melhorar:{l:"Só melhorar a foto",d:"Mantém roupa, fundo e expressão. Só corrige luz, nitidez e cor.",p:"the same photo, only improved: better light, sharpness and color, nothing else changed"},
+      photoshop:{l:"Retoque estilo Photoshop",d:"A mesma foto, editada como um profissional faz no Photoshop: tira espinhas e manchas, uniformiza a pele. O rosto não muda.",p:"the same photo, professionally retouched"},
     }},
   pFormat:{label:"Formato",draw:"p",help:G.imgFormat.help,opts:G.imgFormat.opts},
   pFrame:{label:"Enquadramento",draw:"p",
@@ -268,8 +269,9 @@ Object.assign(G,{
           golden:{l:"Pôr do sol",d:"Dourado, com brilho no cabelo. Para ar livre.",p:"golden-hour sunlight from behind, warm rim light on the hair and shoulders"},
           dramatica:{l:"Dramática",d:"Um lado do rosto na sombra. Ensaio.",p:"dramatic Rembrandt lighting, one side of the face lit and the other in soft shadow"}}},
   pRetouch:{label:"Retoque de pele",text:true,
-    help:"Retoque demais deixa a pele com cara de plástico e a pessoa não se reconhece. Natural mantém a textura, as pintas e as marcas, só acerta luz e cor. Leve tira o brilho e suaviza olheiras. Nenhum deixa a pele como está.",
-    opts:{natural:{l:"Natural",d:"Mantém textura, pintas e marcas. Recomendado.",p:"natural retouch only: keep real skin texture, pores, freckles and marks; just even out lighting and color"},
+    help:"Retoque demais deixa a pele com cara de plástico e a pessoa não se reconhece. Natural mantém a textura, as pintas e as marcas, só acerta luz e cor. Leve tira o brilho e suaviza olheiras. Estilo Photoshop é o retoque de estúdio: tira espinhas, cravos, manchas e vermelhidão, uniformiza o tom da pele e suaviza olheiras, mas mantém os poros e não mexe no formato do rosto, olhos, nariz e boca. Pintas e sardas que fazem parte da pessoa ficam. Nenhum deixa a pele como está.",
+    opts:{photoshop:{l:"Estilo Photoshop",d:"Tira espinhas, manchas e vermelhidão. Pele uniforme, com poros. Rosto igual.",p:"professional Photoshop-style portrait retouch: remove pimples, acne, blackheads, blemishes, dark spots and redness, even out the skin tone, soften under-eye circles, reduce oily shine, tame stray flyaway hairs; keep real skin texture and pores (frequency-separation look, no blur, no plastic skin), keep permanent moles and freckles, and do not reshape any facial feature"},
+          natural:{l:"Natural",d:"Mantém textura, pintas e marcas. Recomendado.",p:"natural retouch only: keep real skin texture, pores, freckles and marks; just even out lighting and color"},
           leve:{l:"Leve",d:"Tira o brilho e suaviza olheiras.",p:"light retouch: reduce shine and soften under-eye shadows slightly, keep real skin texture"},
           nenhum:{l:"Nenhum",d:"Pele exatamente como está.",p:"no skin retouching at all"}}},
 });
@@ -279,6 +281,7 @@ const P_PRESETS={
   autoridade:{pFormat:"45",pFrame:"meio",pOutfit:"casual",pExpr:"confiante",pBg:"escritorio",pLight:"janela",pLightColor:"neutra",pRetouch:"natural"},
   ensaio:{pFormat:"45",pFrame:"meio",pOutfit:"basica",pExpr:"confiante",pBg:"cor",pBgColor:"preto",pLight:"dramatica",pLightColor:"neutra",pRetouch:"leve"},
   melhorar:{pOutfit:"manter",pExpr:"manter",pBg:"manter",pLight:"janela",pLightColor:"neutra",pRetouch:"natural"},
+  photoshop:{pOutfit:"manter",pExpr:"manter",pBg:"manter",pLight:"janela",pLightColor:"neutra",pRetouch:"photoshop",pVar:"1",textMode:"none"},
 };
 
 /* ===== TEXTO NA IMAGEM (produto e pessoa) ===== */
@@ -1457,6 +1460,7 @@ function personPrompt(s){
   const desc=clean(s.pDesc);
   const x=txtZoneInfo(s);
   const avoid=["changing the face or identity","altering body shape","plastic or overly smooth skin","distorted hands","extra fingers","warped background"].concat(x.wantText?["extra or garbled text","watermarks"]:["text","watermarks"]);
+  if(s.pGoal==="photoshop"&&s.ai!=="midjourney")return retouchPrompt(s,x);
   if(s.ai==="midjourney"){
     const ar={"45":"4:5","916":"9:16","11":"1:1"}[s.pFormat];
     const bits=[`professional portrait photo of ${desc||"the person in the reference image"}`,G.pFrame.opts[s.pFrame].p,
@@ -1483,9 +1487,25 @@ function personPrompt(s){
   if(!sepNeg)P.push(`AVOID: ${avoid.join(", ")}.`);
   return {p:P.join("\n"),neg:sepNeg?avoid.join(", "):""};
 }
+/* Retoque estilo Photoshop: edita a foto anexada, não cria uma nova */
+function retouchPrompt(s,x){
+  const sepNeg=s.ai==="leonardo"||s.ai==="ideogram";
+  const lvl=s.pRetouch==="photoshop"||!G.pRetouch.opts[s.pRetouch]
+    ?`remove pimples, acne, blackheads, blemishes, dark spots, small scars from acne and redness; even out blotchy or uneven skin tone; soften dark under-eye circles and bags slightly; reduce oily shine on the forehead, nose and cheeks; tame stray flyaway hairs; slightly brighten the whites of the eyes and the teeth, naturally`
+    :G.pRetouch.opts[s.pRetouch].p;
+  const avoid=["plastic or airbrushed skin","beauty filter look","blurred skin without pores","face reshaping","slimming the face or body","bigger eyes","changing the nose, lips or jaw","changing makeup","changing age","changing skin color","new background","new clothes","cropping or reframing"].concat(x.wantText?["extra or garbled text"]:["text","watermarks"]);
+  const P=[`EDIT the attached photo. This is a retouch of the same photo, not a new photo. Work like a professional retoucher in Photoshop.`,
+    `KEEP EXACTLY THE SAME: the person's identity, face shape, eyes, eyebrows, nose, mouth, lips, jawline, ears and facial proportions; age; expression; natural skin color; hair; body; clothing; pose; background; framing and crop. Anyone who knows this person must recognize the photo as the original, just cleaner.`,
+    `SKIN RETOUCH: ${lvl}.`,
+    `KEEP REAL SKIN: keep the natural skin texture and visible pores, like a frequency-separation retouch. Keep permanent moles, freckles and birthmarks that are part of the person's look. No smoothing blur.`,
+    `FINISH: subtle dodge and burn for natural depth, balanced exposure, natural color correction and white balance, gentle sharpening on the eyes and hair. Same aspect ratio as the original, full resolution.`];
+  if(x.wantText)P.push(...textLines(s,x));
+  if(!sepNeg)P.push(`AVOID: ${avoid.join(", ")}.`);
+  return {p:P.join("\n"),neg:sepNeg?avoid.join(", "):""};
+}
 const VARY_P={pBg:Object.keys(G.pBg.opts).filter(k=>k!=="manter"),pOutfit:Object.keys(G.pOutfit.opts).filter(k=>k!=="manter"),pLight:Object.keys(G.pLight.opts),pLightColor:Object.keys(G.pLightColor.opts)};
 function pVariants(s){
-  const n=+s.pVar, out=[], keys=VARY_P[s.pVary], k=s.pVary;
+  const n=s.pGoal==="photoshop"?1:+s.pVar, out=[], keys=VARY_P[s.pVary], k=s.pVary;
   for(let i=0;i<n;i++){const v={...s};if(i>0)v[k]=rot(keys,keys.includes(s[k])?s[k]:keys[0],keys.includes(s[k])?i:i-1);out.push(v)}
   return out;
 }
@@ -1497,6 +1517,14 @@ function pChecks(s){
   if(s.ai==="midjourney")C.push(["warn","O Midjourney cria uma pessoa parecida, não a mesma. Para manter o rosto, prefira Gemini ou ChatGPT."]);
   if((s.ai==="midjourney"||s.ai==="outra")&&!clean(s.pDesc))C.push(["warn","Preencha “Como a pessoa é”. Se a IA não aceitar a foto, é só pela descrição que ela sabe quem desenhar."]);
   if(s.ai==="gemini"||s.ai==="chatgpt")C.push(["ok","Se o rosto mudar, peça na mesma conversa: “mantenha o rosto exatamente igual ao da foto original”."]);
+  if(s.pGoal==="photoshop"){
+    if(s.ai==="midjourney"||s.ai==="ideogram"||s.ai==="leonardo")C.push(["crit","Retoque da foto real só funciona em IA que edita a foto anexada. Use Gemini ou ChatGPT. Essa IA cria outra pessoa parecida."]);
+    else C.push(["ok","Retoque estilo Photoshop: a IA edita a sua foto, sem trocar roupa, fundo nem enquadramento. Confira se o rosto ficou igual antes de usar."]);
+    if(s.pRetouch==="nenhum")C.push(["warn","Objetivo é retoque, mas a pele está em “Nenhum”. Troque para Estilo Photoshop."]);
+    C.push(["ok","Se a pele ficar lisa demais, peça na mesma conversa: “volte a textura natural da pele, com poros”."]);
+    C.push(...textChecks(s,true));
+    return C;
+  }
   if(s.pBg==="manter"&&s.pOutfit==="manter"&&s.pExpr==="manter")C.push(["ok","Modo “só melhorar”: a IA mexe só em luz, nitidez e cor. É o resultado mais fiel."]);
   if(s.pLight==="dramatica"&&s.pBg==="branco")C.push(["warn","Luz dramática com fundo branco briga. Use fundo escuro ou estúdio cinza."]);
   if(s.pLight==="golden"&&["estudio","branco","cor"].includes(s.pBg))C.push(["warn","Pôr do sol é luz de ar livre. Com fundo de estúdio fica artificial; use ar livre ou cidade."]);
@@ -1509,12 +1537,14 @@ function pChecks(s){
   return C;
 }
 function renderPessoa(s){
+  document.body.dataset.ps=s.pGoal==="photoshop"?"1":"";
   renderGroups(s,P_KEYS);
   $("pBgColorWrap").hidden=s.pBg!=="cor";
   $("cenaBox").hidden=true;
   $("bigPreview").innerHTML=drawPerson(s);
   const R=[["IA",G.ai.opts[s.ai].l],["Objetivo",s.pGoal?G.pGoal.opts[s.pGoal].l:"Livre"],["Enquadramento",G.pFrame.opts[s.pFrame].l],["Roupa",G.pOutfit.opts[s.pOutfit].l],["Expressão",G.pExpr.opts[s.pExpr].l],
     ["Fundo",G.pBg.opts[s.pBg].l+(s.pBg==="cor"?" "+BGCOLORS[s.pBgColor].l:"")],["Luz",G.pLight.opts[s.pLight].l+", "+G.pLightColor.opts[s.pLightColor].l.toLowerCase()],["Pele",G.pRetouch.opts[s.pRetouch].l],["Texto",textSummary(s)]];
+  if(s.pGoal==="photoshop")R.splice(2,5,["Mantém","Rosto, roupa, fundo, luz e enquadramento"]);
   $("recipe").innerHTML=R.map(([a,b])=>`<li><span>${a}</span><span>${esc(b)}</span></li>`).join("");
   drawChecks(pChecks(s));
   const fl=G.pFormat.opts[s.pFormat].l, vs=pVariants(s), n=vs.length;
@@ -1526,7 +1556,11 @@ function renderPessoa(s){
     ideogram:[`Escolha a proporção ${fl} e, se o seu plano permitir, envie a foto da pessoa como referência.`,`Cole a Variação A no prompt e o negative prompt no campo separado, se aparecer.`],
     outra:[`Se a IA aceitar foto, anexe a foto da pessoa. Escolha a proporção ${fl}, se houver essa opção.`,`Cole a Variação A. Se a IA tiver campo de “negative prompt”, cole ali o que está na linha AVOID.`],
   };
-  const steps=[`Escolha uma foto com o rosto bem visível, de frente e com boa luz.`,...BY_AI[s.ai]];
+  const steps=s.pGoal==="photoshop"
+    ?[`Use a foto original na maior qualidade que tiver (mande como arquivo, não print do WhatsApp).`,
+      s.ai==="chatgpt"?`No ChatGPT, clique no + para anexar a foto e cole o prompt.`:`No Gemini, peça para editar a imagem, anexe a foto e cole o prompt.`,
+      `Compare com a original. Se mudou algo no rosto, peça na mesma conversa: “mantenha o rosto exatamente igual ao da foto original, só limpe a pele”.`]
+    :[`Escolha uma foto com o rosto bem visível, de frente e com boa luz.`,...BY_AI[s.ai]];
   if(n>1)steps.push(`Gere ${n>2?"as outras variações":"a Variação B"} do mesmo jeito, com a mesma foto, e compare.`);
   if(s.textMode==="edit")steps.push(canvaStep(s));
   steps.push(`Deu certo? Salve na biblioteca abaixo.`);
