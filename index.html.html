@@ -139,14 +139,17 @@
       <label id="lbHook"><span><span class="only-video">Gancho</span><span class="no-video">Título</span></span> <small><span class="only-video">A primeira frase. Pergunta ou dor.</span><span class="no-video">A frase grande. Até 6 ou 7 palavras.</span></small><input id="hook"></label>
       <label id="lbPromessa"><span><span class="only-video">Promessa</span><span class="no-video">Subtítulo</span></span> <small class="no-video">Uma linha menor, embaixo do título.</small><input id="promessa"></label>
       <label class="only-video">Benefícios <small>Um por linha.</small><textarea id="benef" rows="3"></textarea></label>
+      <label id="lbCaract" class="no-video">Características do produto <small>Uma por linha, até 4. De 1 a 3 palavras cada: Super leve, Qualidade garantida, Solado antiderrapante.</small><textarea id="caract" rows="4" placeholder="Super leve&#10;Qualidade garantida&#10;Solado antiderrapante&#10;Conforto em cada passo"></textarea></label>
       <label id="lbOferta"><span><span class="only-video">Oferta / bônus</span><span class="no-video">Selo</span></span> <small class="no-video">Curto: "50% OFF", "Frete grátis".</small><input id="oferta"></label>
       <label id="lbCta"><span><span class="only-video">CTA</span><span class="no-video">Botão</span></span> <small class="no-video">Ex.: "Compre agora", "Saiba mais".</small><input id="cta"></label>
       <div class="opt no-video" id="g_imgTextPos"></div>
       <div class="opt no-video" id="g_txtStyle"></div>
+      <div class="opt no-video" id="g_subStyle"></div>
       <div class="opt no-video" id="g_txtColor"></div>
       <div class="opt no-video" id="g_txtBg"></div>
+      <div class="opt no-video" id="g_featStyle"></div>
       <div class="row">
-        <label><span class="only-video">Idioma do vídeo</span><span class="no-video">Idioma do texto</span><select id="lang"><option value="pt">Português (BR)</option><option value="es">Espanhol (LATAM)</option></select></label>
+        <label hidden><span class="only-video">Idioma do vídeo</span><span class="no-video">Idioma do texto</span><select id="lang"><option value="pt">Português (BR)</option><!-- Espanhol desligado por enquanto: <option value="es">Espanhol (LATAM)</option> --></select></label>
         <label class="only-video">Clipes de 10 s<select id="clips"><option value="1">1 clipe · 10 s</option><option value="2">2 clipes · 20 s</option><option value="3">3 clipes · 30 s</option><option value="4">4 clipes · 40 s</option></select></label>
       </div>
     </div>
@@ -175,7 +178,7 @@
   <!-- valores das escolhas de imagem -->
   <input type="hidden" id="ai"><input type="hidden" id="preset">
   <input type="hidden" id="textMode"><input type="hidden" id="imgTextPos"><input type="hidden" id="txtTitle"><input type="hidden" id="txtSub"><input type="hidden" id="txtBadge"><input type="hidden" id="txtCta">
-  <input type="hidden" id="txtStyle"><input type="hidden" id="txtColor"><input type="hidden" id="txtBg">
+  <input type="hidden" id="txtStyle"><input type="hidden" id="txtColor"><input type="hidden" id="txtBg"><input type="hidden" id="subStyle"><input type="hidden" id="txtFeat"><input type="hidden" id="featStyle">
   <input type="hidden" id="pGoal"><input type="hidden" id="pFormat"><input type="hidden" id="pFrame"><input type="hidden" id="pOutfit"><input type="hidden" id="pExpr">
   <input type="hidden" id="pBg"><input type="hidden" id="pBgColor"><input type="hidden" id="pLight"><input type="hidden" id="pLightColor"><input type="hidden" id="pRetouch"><input type="hidden" id="imgFormat"><input type="hidden" id="imgStyle"><input type="hidden" id="imgAngle">
   <input type="hidden" id="lightColor"><input type="hidden" id="imgLight"><input type="hidden" id="shadow">

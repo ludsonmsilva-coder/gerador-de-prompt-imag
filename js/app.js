@@ -9,7 +9,7 @@ const ON=Object.keys(MODULOS).filter(k=>MODULOS[k].on);
 
 const $=id=>document.getElementById(id);
 const FIELDS=["mode","nome","visual","bonusVis","lang","clips","hook","promessa","benef","oferta","cta","cena","cenaCustom","textMode","audio","darkCta",
-  "ai","preset","pGoal","pDesc","pFormat","pFrame","pOutfit","pExpr","pBg","pBgColor","pLight","pLightColor","pRetouch","pVar","pVary","imgFormat","imgStyle","imgAngle","lightColor","imgLight","shadow","bg","bgColor","surface","depth","imgVar","imgVary","imgTextPos","txtTitle","txtSub","txtBadge","txtCta","txtStyle","txtColor","txtBg"];
+  "ai","preset","pGoal","pDesc","pFormat","pFrame","pOutfit","pExpr","pBg","pBgColor","pLight","pLightColor","pRetouch","pVar","pVary","imgFormat","imgStyle","imgAngle","lightColor","imgLight","shadow","bg","bgColor","surface","depth","imgVar","imgVary","imgTextPos","txtTitle","txtSub","txtBadge","txtCta","txtStyle","txtColor","txtBg","subStyle","caract","txtFeat","featStyle"];
 
 /* ===== OPÇÕES DE IMAGEM: rótulo, explicação e trecho do prompt ===== */
 const BGCOLORS={
@@ -289,8 +289,8 @@ Object.assign(G,{
           edit:{l:"Eu coloco no Canva",d:"A IA deixa um espaço vazio. Você escreve depois, sem risco de letra errada."},
           gemini:{l:"A IA escreve",d:"O texto já sai pronto na imagem. Confira cada letra antes de usar."}}},
   txtParts:{label:"Quais textos vão na imagem",text:true,multi:true,
-    help:"Ligue só o que você vai usar. Título é a frase grande. Subtítulo é uma linha menor que explica. Selo é o círculo de oferta, como 50% OFF ou Frete grátis. Botão é a chamada para ação, como Compre agora. Quanto menos texto, mais limpa fica a imagem e menos a IA erra.",
-    opts:{txtTitle:{l:"Título"},txtSub:{l:"Subtítulo"},txtBadge:{l:"Selo"},txtCta:{l:"Botão"}}},
+    help:"Ligue só o que você vai usar. Título é a frase grande. Subtítulo é uma linha menor que explica. Características são palavras curtas embaixo do produto, como Forte, Leve, À prova d’água. Selo é o círculo de oferta, como 50% OFF ou Frete grátis. Botão é a chamada para ação, como Compre agora. Quanto menos texto, mais limpa fica a imagem e menos a IA erra.",
+    opts:{txtTitle:{l:"Título"},txtSub:{l:"Subtítulo"},txtFeat:{l:"Características"},txtBadge:{l:"Selo"},txtCta:{l:"Botão"}}},
   imgTextPos:{label:"Onde fica o texto",draw:"t",
     help:"O texto precisa de um espaço vazio para ficar legível. Em cima é o mais usado no feed. Embaixo funciona bem em stories e reels, porque o topo fica coberto pelo nome do perfil. Nas laterais, o produto ou a pessoa vai para o outro lado.",
     opts:{top:{l:"Em cima",d:"O mais usado no feed.",p:"upper third"},
@@ -317,15 +317,37 @@ Object.assign(G,{
           faixa:{l:"Faixa",d:"Tarja de ponta a ponta. Lê bem em qualquer foto.",p:"on a solid color band that spans the full width of the image"},
           caixa:{l:"Caixa",d:"Retângulo arredondado atrás do texto. Moderno.",p:"inside a rounded rectangle box"},
           sombra:{l:"Sombra",d:"Sombra leve na letra. Discreto.",p:"with a soft drop shadow behind the letters for legibility"}}},
+  subStyle:{label:"Estilo da letra do subtítulo",draw:"t",
+    help:"O subtítulo pode ter uma letra diferente do título. Simples é a mais fácil de ler e combina com qualquer título. Igual ao título repete a mesma fonte, só que menor. Misturar dá contraste: título Impacto com subtítulo Simples, ou título Elegante com subtítulo Manuscrita.",
+    opts:{simples:{l:"Simples",d:"Fina e fácil de ler. Combina com tudo. No Canva: Open Sans.",p:"a clean, light sans-serif font",f:"'IBM Plex Sans', Arial, sans-serif",w:500,canva:"Open Sans"},
+          igual:{l:"Igual ao título",d:"Mesma letra do título, só que menor."},
+          moderna:{l:"Moderna",d:"No Canva: Montserrat.",p:"a modern geometric sans-serif font",f:"Montserrat, 'Arial Black', sans-serif",w:800,canva:"Montserrat"},
+          elegante:{l:"Elegante",d:"No Canva: Playfair Display.",p:"an elegant high-contrast serif font",f:"'Playfair Display', Georgia, serif",w:700,canva:"Playfair Display"},
+          manuscrita:{l:"Manuscrita",d:"Delicada. Só frase curta. No Canva: Dancing Script.",p:"a flowing handwritten script font",f:"'Dancing Script', 'Brush Script MT', cursive",w:700,canva:"Dancing Script"},
+          impacto:{l:"Impacto",d:"Tudo maiúsculo. No Canva: Bebas Neue.",p:"a tall condensed all-caps font",f:"'Barlow Condensed', 'Arial Narrow', sans-serif",w:800,up:true,canva:"Bebas Neue"},
+          divertida:{l:"Divertida",d:"No Canva: Fredoka.",p:"a friendly rounded playful font",f:"Fredoka, 'Arial Rounded MT Bold', sans-serif",w:600,canva:"Fredoka"}}},
+  featStyle:{label:"Como mostrar as características",draw:"t",
+    help:"As características ficam numa fileira embaixo do produto. Faixa com ícones é aquela tarja escura no rodapé, com ícone do lado de cada característica e uma linha separando, como nos anúncios de tênis e eletrônicos. Ícone + palavra: um desenho simples em cima de cada palavra. Etiquetas são palavras dentro de cápsulas arredondadas. Lista com ✓ é cada palavra com um sinal de certo na frente. Use até 4 características, com 1 a 3 palavras cada.",
+    opts:{faixa:{l:"Faixa com ícones",d:"Tarja escura no rodapé, ícone ao lado de cada característica, separadas por linhas. Aguenta 2 ou 3 palavras.",p:"band"},
+          icones:{l:"Ícone + palavra",d:"Um ícone simples em cima de cada palavra.",p:"each one as a small simple line icon that matches its meaning with the word right below it"},
+          etiquetas:{l:"Etiquetas",d:"Cada palavra dentro de uma cápsula arredondada.",p:"each word inside its own small rounded pill-shaped label"},
+          check:{l:"Lista com ✓",d:"Cada palavra com um sinal de certo na frente.",p:"each word preceded by a small check mark icon"}}},
 });
-const TXT_KEYS=["textMode","txtParts","imgTextPos","txtStyle","txtColor","txtBg"];
+function subSt(s){
+  const t=G.txtStyle.opts[s.txtStyle]||G.txtStyle.opts.moderna;
+  const k=s.subStyle||"simples";
+  if(k==="igual")return t;
+  return G.subStyle.opts[k]||G.subStyle.opts.simples;
+}
+function featList(s){return s.mode==="img"&&s.txtFeat==="1"?String(s.caract||"").split(/\n|;/).map(clean).filter(Boolean).slice(0,4):[]}
+const TXT_KEYS=["textMode","txtParts","imgTextPos","txtStyle","subStyle","txtColor","txtBg","featStyle"];
 const IMG_KEYS=["ai","preset","imgFormat","imgStyle","imgAngle","lightColor","imgLight","shadow","bg","surface","depth",...TXT_KEYS];
 const P_KEYS=["ai","pGoal","pFormat","pFrame","pOutfit","pExpr","pBg","pLightColor","pLight","pRetouch",...TXT_KEYS];
 
 function txtOf(s,ph){
   const on=k=>s.mode==="video"||s[k]==="1";
   const g=(k,v,p)=>on(k)?(clean(v)||(ph?p:"")):"";
-  return {h:g("txtTitle",s.hook,"Seu título aqui"),sub:g("txtSub",s.promessa,"Subtítulo menor"),badge:g("txtBadge",s.oferta,"50% OFF"),cta:g("txtCta",s.cta,"Compre agora")};
+  return {h:g("txtTitle",s.hook,"Seu título aqui"),sub:g("txtSub",s.promessa,"Subtítulo menor"),badge:g("txtBadge",s.oferta,"50% OFF"),cta:g("txtCta",s.cta,"Compre agora"),feat:(()=>{const f=featList(s);return f.length||!(ph&&s.mode==="img"&&s.txtFeat==="1")?f:["Forte","Leve","Prático"]})()};
 }
 function wrapTxt(t,per,max){
   const out=[];let cur="";
@@ -350,7 +372,8 @@ function textOverlay(s,W,H,z,o){
   const side=z.w<60, fsT=side?8:9.5, fsS=side?4.2:4.8;
   const cw=st.up?.58:(s.txtStyle==="manuscrita"?.52:.62);
   const lines=T.h?wrapTxt(st.up?T.h.toUpperCase():T.h,Math.max(6,Math.floor((z.w-6)/(fsT*cw))),3):[];
-  const subL=T.sub?wrapTxt(T.sub,Math.floor((z.w-6)/(fsS*.52)),2):[];
+  const ss=subSt(s), subTxt=T.sub?(ss.up?T.sub.toUpperCase():T.sub):"";
+  const subL=subTxt?wrapTxt(subTxt,Math.floor((z.w-6)/(fsS*(ss.up?.5:.52))),2):[];
   const cx=z.x+z.w/2;
   const blockH=lines.length*fsT*1.05+(subL.length?subL.length*fsS*1.25+1.5:0)+(T.cta?11:0);
   const top=z.y+Math.max(1,(z.h-blockH)/2);
@@ -360,7 +383,7 @@ function textOverlay(s,W,H,z,o){
   if(s.txtBg==="faixa")out+=`<rect x="${side?z.x-3:0}" y="${top-3}" width="${side?z.w+6:W}" height="${blockH+5}" fill="${panel}" opacity=".88"/>`;
   if(s.txtBg==="caixa")out+=`<rect x="${z.x+2}" y="${top-3}" width="${z.w-4}" height="${blockH+5}" rx="3.5" fill="${panel}" opacity=".9"/>`;
   lines.forEach(l=>{out+=`<text x="${cx}" y="${y}" text-anchor="middle" font-family="${st.f}" font-weight="${st.w}" font-size="${fsT}" fill="${tc}"${sh}>${esc(l)}</text>`;y+=fsT*1.05});
-  if(subL.length){y+=1.5-fsT*.25+fsS*.6;subL.forEach(l=>{out+=`<text x="${cx}" y="${y}" text-anchor="middle" font-family="IBM Plex Sans,sans-serif" font-weight="500" font-size="${fsS}" fill="${tc}"${sh}>${esc(l)}</text>`;y+=fsS*1.25});}
+  if(subL.length){y+=1.5-fsT*.25+fsS*.6;subL.forEach(l=>{out+=`<text x="${cx}" y="${y}" text-anchor="middle" font-family="${ss.f}" font-weight="${ss.w}" font-size="${fsS*(ss.up?1.1:1)}" fill="${tc}"${sh}>${esc(l)}</text>`;y+=fsS*1.25});}
   if(T.cta){const bw=Math.min(z.w-8,T.cta.length*2.5+12), by=y-fsS*.5+1.5;out+=`<rect x="${cx-bw/2}" y="${by}" width="${bw}" height="8" rx="4" fill="#E8743B"/><text x="${cx}" y="${by+5.5}" text-anchor="middle" font-family="IBM Plex Sans,sans-serif" font-weight="600" font-size="4.2" fill="#fff">${esc(T.cta)}</text>`;}
   if(T.badge){
     const bx=s.imgTextPos==="right"?13:W-13, byy=s.imgTextPos==="top"?Math.min(H-13,z.y+z.h+12):13;
@@ -369,12 +392,61 @@ function textOverlay(s,W,H,z,o){
   }
   return out;
 }
+const FEAT_ICON=[(x,y,c)=>`<path d="M${x-2.2} ${y+1.6} L${x} ${y-2.2} L${x+2.2} ${y+1.6} Z" fill="none" stroke="${c}" stroke-width=".55"/>`,
+  (x,y,c)=>`<circle cx="${x}" cy="${y}" r="2.1" fill="none" stroke="${c}" stroke-width=".55"/><path d="M${x-1} ${y} l.8 .8 l1.4 -1.6" fill="none" stroke="${c}" stroke-width=".55"/>`,
+  (x,y,c)=>`<path d="M${x} ${y-2.3} C${x+2.4} ${y-.4} ${x+1.6} ${y+2.2} ${x} ${y+2.2} C${x-1.6} ${y+2.2} ${x-2.4} ${y-.4} ${x} ${y-2.3}Z" fill="none" stroke="${c}" stroke-width=".55"/>`,
+  (x,y,c)=>`<rect x="${x-2}" y="${y-2}" width="4" height="4" rx=".8" fill="none" stroke="${c}" stroke-width=".55"/>`];
+/* fileira de características embaixo do produto (prévia) */
+function featRow(s,list,cx,y,maxW,tc,k=1){
+  if(!list.length)return "";
+  const n=list.length, slot=Math.min(24*k,maxW/n), x0=cx-slot*n/2+slot/2, st=s.featStyle||"icones";
+  const pill=tc==="#FFFFFF"?"#15191E":"#FFFFFF";
+  return list.map((t,i)=>{
+    const x=x0+i*slot, lab=t.length>11?t.slice(0,10)+"…":t, fs=Math.min(3.4*k,slot/(lab.length*.62+.5));
+    if(st==="etiquetas")return `<rect x="${x-slot/2+1}" y="${y-3.2*k}" width="${slot-2}" height="${5.4*k}" rx="${2.7*k}" fill="${pill}" opacity=".85" stroke="${tc}" stroke-width=".3"/><text x="${x}" y="${y+.6*k}" text-anchor="middle" font-family="IBM Plex Sans,sans-serif" font-weight="600" font-size="${fs}" fill="${tc}">${esc(lab)}</text>`;
+    if(st==="check")return `<path d="M${x-slot/2+1.5} ${y-.4} l${.9*k} ${.9*k} l${1.6*k} ${-1.9*k}" fill="none" stroke="${tc}" stroke-width=".6"/><text x="${x-slot/2+1.5+3*k}" y="${y+.6*k}" font-family="IBM Plex Sans,sans-serif" font-weight="600" font-size="${fs}" fill="${tc}">${esc(lab)}</text>`;
+    return `<g transform="translate(${x} ${y-3*k}) scale(${k}) translate(${-x} ${-(y-3*k)})">${FEAT_ICON[i%4](x,y-3*k,tc)}</g><text x="${x}" y="${y+2.6*k}" text-anchor="middle" font-family="IBM Plex Sans,sans-serif" font-weight="600" font-size="${fs}" fill="${tc}">${esc(lab)}</text>`;
+  }).join("");
+}
+/* faixa escura no rodapé com ícone ao lado de cada característica */
+function featBand(list,W,y,h,k=1){
+  if(!list.length)return "";
+  const n=list.length, slot=W/n;
+  let g=`<rect x="0" y="${y}" width="${W}" height="${h}" fill="#15191E" opacity=".92"/>`;
+  const split=t=>{const w=t.toUpperCase().split(/\s+/);return w.length>1?[w.slice(0,Math.ceil(w.length/2)).join(" "),w.slice(Math.ceil(w.length/2)).join(" ")]:[w[0],""]};
+  const icw=Math.min(h*.26,slot*.12), room0=slot-(slot*.12+icw*2.3)-slot*.05;
+  const FS=Math.min(h*.26,...list.map(t=>{const [a,b]=split(t);return room0/(Math.max(a.length,b.length)*.6+.3)}));
+  list.forEach((t,i)=>{
+    const x0=i*slot, cy=y+h/2, ic=Math.min(h*.26,slot*.12);
+    if(i)g+=`<line x1="${x0}" y1="${y+h*.22}" x2="${x0}" y2="${y+h*.78}" stroke="#fff" stroke-width=".35" opacity=".6"/>`;
+    const words=t.toUpperCase().split(/\s+/), l1=words.length>1?words.slice(0,Math.ceil(words.length/2)).join(" "):words[0], l2=words.length>1?words.slice(Math.ceil(words.length/2)).join(" "):"";
+    const tx=x0+slot*.12+ic*2.3, room=slot-(tx-x0)-slot*.05, longest=Math.max(l1.length,l2.length);
+    const fs=Math.min(room/(longest*.6+.3),Math.max(FS,h*.19));
+    g+=`<g transform="translate(${x0+slot*.1+ic} ${cy}) scale(${ic/2.2}) translate(${-(x0+slot*.1+ic)} ${-cy})">${FEAT_ICON[i%4](x0+slot*.1+ic,cy,"#FFFFFF")}</g>`;
+    const ital=`font-style="italic" font-family="'Barlow Condensed','Arial Narrow',sans-serif" font-weight="800" font-size="${fs}" fill="#fff"`;
+    g+=l2?`<text x="${tx}" y="${cy-fs*.12}" ${ital}>${esc(l1)}</text><text x="${tx}" y="${cy+fs*.88}" ${ital}>${esc(l2)}</text>`:`<text x="${tx}" y="${cy+fs*.35}" ${ital}>${esc(l1)}</text>`;
+  });
+  return g;
+}
+function featThumb(ov){
+  if((ov.featStyle||"faixa")==="faixa"){
+    const f=featList({...ov,mode:"img",txtFeat:"1"}), list=f.length?f.slice(0,3):["Super leve","Qualidade garantida","Conforto"];
+    return `<svg viewBox="0 0 100 64" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Amostra"><rect width="100" height="64" fill="#F3F1EC"/><rect x="43" y="8" width="14" height="22" rx="2" fill="#3D4A66"/><rect x="45.5" y="5" width="9" height="4" rx="1" fill="#C9A15B"/>${featBand(list,100,40,20)}</svg>`;
+  }
+  const f=featList({...ov,mode:"img",txtFeat:"1"}), list=f.length?f.slice(0,3):["Forte","Leve","Prático"];
+  return `<svg viewBox="0 0 100 64" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Amostra"><rect width="100" height="64" fill="#F3F1EC"/><rect x="43" y="9" width="14" height="22" rx="2" fill="#3D4A66"/><rect x="45.5" y="6" width="9" height="4" rx="1" fill="#C9A15B"/>${featRow(ov,list,50,46,92,"#15191E",1.7)}</svg>`;
+}
 const TS_FILTER=id=>`<filter id="${id}ts" x="-20%" y="-50%" width="140%" height="200%"><feDropShadow dx=".4" dy=".6" stdDeviation=".7" flood-color="#000" flood-opacity=".7"/></filter>`;
 function drawTextThumb(s,key,v){
   const ov={...s,[key]:v};
   if(key==="textMode"||key==="imgTextPos"){
     if(key==="imgTextPos"&&ov.textMode==="none")ov.textMode="edit";
     return s.mode==="pessoa"?drawPerson({...ov,pFormat:"11"},{thumb:true,noIcon:true,withText:true}):drawScene({...ov,imgFormat:"11"},{thumb:true,noIcon:true,withText:true});
+  }
+  if(key==="featStyle")return featThumb(ov);
+  if(key==="subStyle"){
+    const tt=G.txtStyle.opts[ov.txtStyle]||G.txtStyle.opts.moderna, ss=subSt(ov), w1=tt.up?"TÍTULO":"Título", w2=ss.up?"SUBTÍTULO MENOR":"Subtítulo menor";
+    return `<svg viewBox="0 0 100 64" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Amostra"><rect width="100" height="64" fill="#F3F1EC"/><text x="50" y="30" text-anchor="middle" font-family="${tt.f}" font-weight="${tt.w}" font-size="17" fill="#15191E">${w1}</text><text x="50" y="46" text-anchor="middle" font-family="${ss.f}" font-weight="${ss.w}" font-size="${ss.up?10:9}" fill="#15191E">${w2}</text></svg>`;
   }
   const id="t"+(UID++), st=G.txtStyle.opts[ov.txtStyle]||G.txtStyle.opts.moderna, word=st.up?"OFERTA":"Oferta";
   let bg, dark;
@@ -389,6 +461,14 @@ function drawTextThumb(s,key,v){
   const sh=key==="txtBg"&&ov.txtBg==="sombra"?` filter="url(#${id}ts)"`:"";
   return `<svg viewBox="0 0 100 64" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Amostra"><defs>${TS_FILTER(id)}</defs>${bg}${deco}<text x="50" y="40" text-anchor="middle" font-family="${st.f}" font-weight="${st.w}" font-size="${fs}" fill="${tc}"${sh}>${word}</text></svg>`;
 }
+function canvaStep(s){
+  const t=G.txtStyle.opts[s.txtStyle].canva, sc=subSt(s).canva, f=featList(s);
+  let m=`No Canva, escreva os textos no espaço livre. Título com a fonte ${t}`;
+  if(s.txtSub==="1"&&sc&&sc!==t)m+=`, subtítulo com ${sc}`;
+  m+=".";
+  if(f.length)m+=` Embaixo do produto, coloque as características (${f.join(", ")}) ${{faixa:"numa faixa escura no rodapé, com um ícone ao lado de cada uma e uma linha fina separando (em Elementos, busque pela palavra)",icones:"com um ícone em cima de cada uma (em Elementos, busque pela palavra)",etiquetas:"dentro de etiquetas arredondadas",check:"com um ✓ na frente de cada uma"}[s.featStyle||"faixa"]}.`;
+  return m;
+}
 function textSummary(s){
   if(s.textMode==="none")return "Sem texto";
   const pos=G.imgTextPos.opts[s.imgTextPos].l.toLowerCase();
@@ -398,23 +478,29 @@ function textSummary(s){
 function txtZoneInfo(s){
   const pos=s.imgTextPos||"top", T=txtOf(s,false);
   return {textZone:G.imgTextPos.opts[pos].p,prodZone:{top:"lower two thirds",bottom:"upper two thirds",left:"right half",right:"left half"}[pos],
-    space:s.textMode!=="none",h:T.h,sub:T.sub,badge:T.badge,cta:T.cta,wantText:s.textMode==="gemini"&&!!(T.h||T.sub||T.badge||T.cta)};
+    space:s.textMode!=="none",h:T.h,sub:T.sub,badge:T.badge,cta:T.cta,feat:T.feat,wantText:s.textMode==="gemini"&&!!(T.h||T.sub||T.badge||T.cta||T.feat.length)};
 }
 function textLines(s,x){
   const L=LANG[s.lang];
   if(s.textMode==="none")return [`TEXT: none. Do not add any text, letters or logos to the image.`];
-  if(!x.wantText)return [`TEXT: none. Leave the ${x.textZone} as clean, empty negative space for text added later.`];
+  if(!x.wantText)return [`TEXT: none. Leave the ${x.textZone} as clean, empty negative space for text added later.`+(x.feat&&x.feat.length?` ${(s.featStyle||"faixa")==="faixa"?`Also leave a clean, plain strip along the bottom edge of the image, below the product, for a band of ${x.feat.length} feature labels added later.`:`Also leave a clean empty strip directly below the product for a row of ${x.feat.length} short feature labels added later.`}`:"")];
   const st=G.txtStyle.opts[s.txtStyle], co=G.txtColor.opts[s.txtColor], tb=G.txtBg.opts[s.txtBg];
   const P=[`TEXT ON IMAGE (${L}, spell exactly as written, keep every accent), placed in the ${x.textZone}, set in ${st.p}, ${co.p}, ${tb.p}:`];
   if(x.h)P.push(`  Title, large${st.up?", all caps":""}: "${x.h}"`);
-  if(x.sub)P.push(`  Subtitle below the title, smaller and lighter: "${x.sub}"`);
+  if(x.sub){const ss=subSt(s);P.push(`  Subtitle below the title, smaller, set in ${s.subStyle==="igual"?"the same font as the title":ss.p}${ss.up?", all caps":""}: "${x.sub}"`);}
+  if(x.feat&&x.feat.length)P.push((s.featStyle||"faixa")==="faixa"
+    ?`  Product features in a full-width dark band along the bottom edge of the image, below the product: the features side by side in equal columns separated by thin vertical white divider lines, each with a small simple white line icon that matches its meaning on the left and the words in bold italic condensed all-caps white letters on the right (two short lines if needed): ${x.feat.map(f=>`"${f}"`).join(", ")}`
+    :`  Product features in one neat, evenly spaced row directly below the product, ${(G.featStyle.opts[s.featStyle]||G.featStyle.opts.icones).p}, same text color, small and clean: ${x.feat.map(f=>`"${f}"`).join(", ")}`);
   if(x.badge)P.push(`  Round badge in a corner, bold contrasting color: "${x.badge}"`);
   if(x.cta)P.push(`  Rounded button below the text: "${x.cta}"`);
   P.push(`  No other text anywhere in the image.`);
   return P;
 }
 function textChecks(s,busy){
-  const C=[], T=txtOf(s,false), total=[T.h,T.sub,T.badge,T.cta].filter(Boolean);
+  const C=[], T=txtOf(s,false), total=[T.h,T.sub,T.badge,T.cta,...T.feat].filter(Boolean);
+  if(s.mode==="img"&&s.txtFeat==="1"&&!T.feat.length)C.push(["warn","Características ligadas, mas vazias. Escreva uma por linha, como Forte, Leve, Prático."]);
+  if(T.feat.length&&s.featStyle==="faixa"&&s.imgTextPos==="bottom")C.push(["warn","O texto está embaixo e a faixa de características também fica no rodapé. Coloque o texto em cima para não amontoar."]);
+  if(T.feat.some(f=>words(f)>3))C.push(["warn","Característica longa. Use 1 a 3 palavras em cada uma, senão a fileira fica pequena e a IA erra letras."]);
   if(s.textMode==="none")return C;
   if(s.textMode==="gemini"){
     if(!total.length)C.push(["warn","Você escolheu “A IA escreve”, mas nenhum texto está ligado e preenchido."]);
@@ -425,7 +511,7 @@ function textChecks(s,busy){
       else if(s.ai==="gemini"||s.ai==="chatgpt")C.push(["ok","Texto pela IA: confira acentos e letras. Se errar, peça na conversa “corrija o texto para …” em vez de gerar de novo."]);
       else C.push(["warn","Texto dentro da imagem é o ponto fraco dessa IA. Confira cada letra ou coloque o texto no Canva."]);
     }
-    if(s.ai==="midjourney"&&(T.sub||T.badge||T.cta))C.push(["warn","No Midjourney só o título vai no prompt. Subtítulo, selo e botão coloque no Canva."]);
+    if(s.ai==="midjourney"&&(T.sub||T.badge||T.cta||T.feat.length))C.push(["warn","No Midjourney só o título vai no prompt. Subtítulo, características, selo e botão coloque no Canva."]);
     if(s.txtStyle==="manuscrita"&&words(T.h)>5)C.push(["warn","Letra manuscrita fica difícil de ler em frase longa. Use até 5 palavras ou troque para Moderna."]);
     if(busy&&s.txtBg==="nenhum")C.push(["warn","O fundo da foto tem muitos detalhes e o texto está sem fundo. Use Faixa, Caixa ou Sombra para ler melhor."]);
   } else C.push(["ok",`Texto fica para o Canva: a imagem sai com o espaço livre, sem risco de letra errada. Fonte sugerida: ${G.txtStyle.opts[s.txtStyle].canva}.`]);
@@ -635,6 +721,18 @@ function drawScene(s,o={}){
   if(showText){
     const darkBg=dark||(["solid","blur","gradient"].includes(s.bg)&&["preto","terracota"].includes(s.bgColor))||(s.bg==="scene"&&s.cena==="studio");
     txt=textOverlay(s,W,H,zoneFor(s,W,H),{id,darkBg,brand:PB});
+    const fl=txtOf(s,true).feat;
+    if(fl.length&&s.featStyle==="faixa"){
+      const bh=Math.max(11,H*.1);
+      txt+=s.textMode==="gemini"?featBand(fl,W,H-bh,bh):`<rect x="2" y="${H-bh+1}" width="${W-4}" height="${bh-3}" rx="1.5" fill="#15191E" fill-opacity=".06" stroke="#15191E" stroke-width=".5" stroke-dasharray="1.5 1.2"/><text x="${W/2}" y="${H-bh/2+.6}" text-anchor="middle" font-family="IBM Plex Sans,sans-serif" font-weight="600" font-size="3.2" fill="#15191E" opacity=".85">faixa de características</text>`;
+    } else if(fl.length&&s.textMode==="gemini"){
+      const fy=topView?Math.min(H-5,(zy0+zy1)/2+(macro?30:20)):Math.min(H-5,by+(s.surface==="espelho"?12:8));
+      const fw=tpos==="left"||tpos==="right"?46:80;
+      txt+=featRow(s,fl,cx,fy,fw,txtHex(s,darkBg,PB));
+    } else if(fl.length&&s.textMode==="edit"){
+      const fy=Math.min(H-8,by+4), fw=tpos==="left"||tpos==="right"?40:64, tc0=darkBg?"#FFFFFF":"#15191E";
+      txt+=`<rect x="${cx-fw/2}" y="${fy}" width="${fw}" height="7" rx="1.5" fill="${tc0}" fill-opacity=".06" stroke="${tc0}" stroke-width=".5" stroke-dasharray="1.5 1.2"/><text x="${cx}" y="${fy+4.6}" text-anchor="middle" font-family="IBM Plex Sans,sans-serif" font-weight="600" font-size="3.2" fill="${tc0}" opacity=".85">características</text>`;
+    }
   }
   const bgWrap=blur&&s.bg!=="scene"&&!topView?`<g filter="url(#${id}b)">${bgG}</g>`:bgG;
   d+=bgWrap+surfG+prodG+extras+light+icon+txt+`</g>`;
@@ -854,14 +952,14 @@ function drawHouse(s,o={}){
 
 /* ===== componentes de escolha ===== */
 function renderGroups(s,keys){
-  const hide=s.mode==="img"?hideOf(s):[];
+  const hide=(s.mode==="img"?hideOf(s):[]).concat(s.mode!=="video"&&s.txtSub!=="1"?["subStyle"]:[]).concat(s.mode==="img"&&s.txtFeat==="1"&&s.textMode!=="none"?[]:["featStyle"]);
   keys.filter(k=>G[k]).forEach(key=>{
     const g=s.mode==="img"?gOf(s,key):G[key];
     const box=$("g_"+key); if(!box)return;
     box.hidden=hide.includes(key); if(box.hidden)return;
     const open=box.dataset.open==="1";
     const cur=s[key];
-    const chips=Object.entries(g.opts).filter(([v])=>s.mode!=="img"||optOk(s,key,v)).map(([v,o])=>{
+    const chips=Object.entries(g.opts).filter(([v])=>(s.mode!=="img"||optOk(s,key,v))&&!(key==="txtParts"&&v==="txtFeat"&&s.mode!=="img")).map(([v,o])=>{
       let thumb="";
       if(g.draw==="t"){
         thumb=drawTextThumb(s,key,v);
@@ -952,7 +1050,7 @@ const EXAMPLE={
 const EXAMPLE_IMG={mode:"img",nome:"Sérum Facial Vitamina C",
   visual:"a 30 ml amber glass dropper bottle with a gold cap and a white label reading 'VITAMINA C SERUM' in black letters",
   bonusVis:"a few orange slices and the white product box",
-  lang:"pt",textMode:"gemini",txtTitle:"1",txtSub:"1",txtBadge:"1",txtCta:"",txtStyle:"elegante",txtColor:"auto",txtBg:"nenhum",hook:"Pele radiante em 7 dias",promessa:"Sérum com 20% de vitamina C",oferta:"Frete grátis",cta:"Compre agora",
+  lang:"pt",textMode:"gemini",txtTitle:"1",txtSub:"1",txtBadge:"1",txtCta:"",txtStyle:"elegante",subStyle:"simples",txtColor:"auto",txtBg:"nenhum",txtFeat:"1",caract:"Vegano\nSem perfume\nUso diário",featStyle:"faixa",hook:"Pele radiante em 7 dias",promessa:"Sérum com 20% de vitamina C",oferta:"Frete grátis",cta:"Compre agora",
   imgFormat:"45",imgTextPos:"top",imgVar:"3",imgVary:"lightColor",cena:"bath",cenaCustom:"",preset:"beleza",...PRESETS.beleza};
 const EXAMPLE_KIND={
   carro:{nome:"Jeep Compass 2023",visual:"a white 2023 Jeep Compass Longitude SUV with a black roof and 18-inch dark alloy wheels",bonusVis:"",hook:"Seu próximo SUV está aqui",promessa:"Revisado, com laudo cautelar aprovado",oferta:"Aceito troca",cta:"Agende o test drive"},
@@ -961,7 +1059,7 @@ const EXAMPLE_KIND={
 const isExampleText=v=>!clean(v)||[EXAMPLE_IMG.visual,EXAMPLE_KIND.carro.visual,EXAMPLE_KIND.imovel.visual].includes(v);
 const DEFAULT_P={pGoal:"",pDesc:"",pFormat:"11",pFrame:"rosto",pOutfit:"manter",pExpr:"manter",pBg:"manter",pBgColor:"azul",pLight:"janela",pLightColor:"neutra",pRetouch:"natural",pVar:"1",pVary:"pBg"};
 const EXAMPLE_P={mode:"pessoa",...DEFAULT_P,pGoal:"linkedin",...P_PRESETS.linkedin,pVar:"3",pVary:"pBg",textMode:"none",txtTitle:"1",txtSub:"",txtBadge:"",txtCta:"",hook:"",promessa:"",oferta:"",cta:""};
-const DEFAULT_IMG={...DEFAULT_P,ai:"gemini",imgFormat:"45",imgStyle:"hero",imgAngle:"threeq",lightColor:"neutra",imgLight:"window",shadow:"suave",bg:"white",bgColor:"bege",surface:"infinito",depth:"desfocado",imgVar:"1",imgVary:"lightColor",imgTextPos:"top",cena:"wood",lang:"pt",textMode:"edit",clips:"2",audio:"music",txtTitle:"1",txtSub:"",txtBadge:"",txtCta:"",txtStyle:"moderna",txtColor:"auto",txtBg:"nenhum"};
+const DEFAULT_IMG={...DEFAULT_P,ai:"gemini",imgFormat:"45",imgStyle:"hero",imgAngle:"threeq",lightColor:"neutra",imgLight:"window",shadow:"suave",bg:"white",bgColor:"bege",surface:"infinito",depth:"desfocado",imgVar:"1",imgVary:"lightColor",imgTextPos:"top",cena:"wood",lang:"pt",textMode:"edit",clips:"2",audio:"music",txtTitle:"1",txtSub:"",txtBadge:"",txtCta:"",txtStyle:"moderna",txtColor:"auto",txtBg:"nenhum",subStyle:"simples",txtFeat:"",caract:"",featStyle:"faixa"};
 
 function get(){const s={};FIELDS.forEach(k=>{const el=$(k);s[k]=el.type==="checkbox"?el.checked:el.value});return s}
 function set(s){FIELDS.forEach(k=>{const el=$(k);if(!(k in s))return;if(el.type==="checkbox")el.checked=!!s[k];else el.value=s[k]});render()}
@@ -1346,7 +1444,7 @@ function renderImg(s){
   };
   const steps=[{produto:`Tire uma foto do produto com o celular, com boa luz e fundo limpo.`,carro:carFix(s)?`Separe a foto do carro que você já tirou no pátio, na maior resolução que tiver (mande como arquivo, não print do WhatsApp).`:`Fotografe o carro inteiro com o celular, de dia, limpo e no mesmo ângulo que escolheu.`,imovel:`Fotografe ${s.imgStyle==="fachada"?"a frente do imóvel":"o ambiente"} com o celular na horizontal e reto, na altura do peito, com as janelas abertas.`}[kd],...BY_AI[s.ai]];
   if(n>1)steps.push(`Gere ${n>2?"as outras variações":"a Variação B"} do mesmo jeito, com a mesma foto, e compare.`);
-  if(s.textMode==="edit")steps.push(`No Canva, escreva os textos no espaço livre com a fonte ${G.txtStyle.opts[s.txtStyle].canva}.`);
+  if(s.textMode==="edit")steps.push(canvaStep(s));
   steps.push(`Deu certo? Salve na biblioteca abaixo.`);
   $("steps").innerHTML=steps.map(t=>`<li>${esc(t)}</li>`).join("");
   drawTakes(vs.map((v,i)=>({t:`Variação ${"ABCD"[i]}${n>1?" · "+variantLabel(v,s):""}`,m:`${G.ai.opts[s.ai].l} · ${fl}`,...staticPrompt(v)})));
@@ -1430,13 +1528,16 @@ function renderPessoa(s){
   };
   const steps=[`Escolha uma foto com o rosto bem visível, de frente e com boa luz.`,...BY_AI[s.ai]];
   if(n>1)steps.push(`Gere ${n>2?"as outras variações":"a Variação B"} do mesmo jeito, com a mesma foto, e compare.`);
-  if(s.textMode==="edit")steps.push(`No Canva, escreva os textos no espaço livre com a fonte ${G.txtStyle.opts[s.txtStyle].canva}.`);
+  if(s.textMode==="edit")steps.push(canvaStep(s));
   steps.push(`Deu certo? Salve na biblioteca abaixo.`);
   $("steps").innerHTML=steps.map(t=>`<li>${esc(t)}</li>`).join("");
   drawTakes(vs.map((v,i)=>({t:`Variação ${"ABCD"[i]}${n>1?" · "+G[s.pVary].opts[v[s.pVary]].l.toLowerCase():""}`,m:`${G.ai.opts[s.ai].l} · ${fl}`,...personPrompt(v)})));
 }
 
 function render(){
+  $("lang").value="pt"; /* por enquanto só português */
+  if(!$("subStyle").value)$("subStyle").value="simples";
+  if(!$("featStyle").value)$("featStyle").value="faixa";
   const s=get();
   if(!MODULOS[s.mode]||!MODULOS[s.mode].on){s.mode=ON[0];$("mode").value=s.mode}
   document.body.dataset.mode=s.mode;
@@ -1445,6 +1546,7 @@ function render(){
   $("cenaCustomWrap").hidden=s.cena!=="custom";
   $("txtWrap").hidden=s.mode!=="video"&&s.textMode==="none";
   [["lbHook","txtTitle"],["lbPromessa","txtSub"],["lbOferta","txtBadge"],["lbCta","txtCta"]].forEach(([l,k])=>{$(l).hidden=s.mode!=="video"&&s[k]!=="1"});
+  $("lbCaract").hidden=s.mode!=="img"||s.txtFeat!=="1";
   if(s.mode==="img"){renderImg(s);saveDraft(s);return}
   if(s.mode==="pessoa"){renderPessoa(s);saveDraft(s);return}
   $("cenaSlotVid").appendChild($("cenaBox")); $("cenaBox").hidden=false;
