@@ -269,8 +269,9 @@ Object.assign(G,{
           golden:{l:"Pôr do sol",d:"Dourado, com brilho no cabelo. Para ar livre.",p:"golden-hour sunlight from behind, warm rim light on the hair and shoulders"},
           dramatica:{l:"Dramática",d:"Um lado do rosto na sombra. Ensaio.",p:"dramatic Rembrandt lighting, one side of the face lit and the other in soft shadow"}}},
   pRetouch:{label:"Retoque de pele",text:true,
-    help:"Retoque demais deixa a pele com cara de plástico e a pessoa não se reconhece. Natural mantém a textura, as pintas e as marcas, só acerta luz e cor. Leve tira o brilho e suaviza olheiras. Estilo Photoshop é o retoque de estúdio: tira espinhas, cravos, manchas e vermelhidão, uniformiza o tom da pele e suaviza olheiras, mas mantém os poros e não mexe no formato do rosto, olhos, nariz e boca. Pintas e sardas que fazem parte da pessoa ficam. Nenhum deixa a pele como está.",
-    opts:{photoshop:{l:"Estilo Photoshop",d:"Tira espinhas, manchas e vermelhidão. Pele uniforme, com poros. Rosto igual.",p:"professional Photoshop-style portrait retouch: remove pimples, acne, blackheads, blemishes, dark spots and redness, even out the skin tone, soften under-eye circles, reduce oily shine, tame stray flyaway hairs; keep real skin texture and pores (frequency-separation look, no blur, no plastic skin), keep permanent moles and freckles, and do not reshape any facial feature"},
+    help:"Retoque demais deixa a pele com cara de plástico e a pessoa não se reconhece. Natural mantém a textura, as pintas e as marcas, só acerta luz e cor. Leve tira o brilho e suaviza olheiras. Photoshop forte é o retoque de revista: pele bem lisa e iluminada, cor viva, a diferença aparece de longe. Estilo Photoshop é o retoque de estúdio: tira espinhas, cravos, manchas e vermelhidão, uniformiza o tom da pele e suaviza olheiras, mas mantém os poros e não mexe no formato do rosto, olhos, nariz e boca. Pintas e sardas que fazem parte da pessoa ficam. Nenhum deixa a pele como está.",
+    opts:{photoshopForte:{l:"Photoshop forte",d:"Retoque de revista: pele bem lisa e iluminada, foto nítida e com cor viva. Rosto igual.",p:"strong high-end beauty retouch like a magazine cover: flawless, evenly toned, luminous skin with all blemishes, spots, redness and under-eye circles removed, skin visibly smoothed but still with fine natural texture, faces brightened, eyes and teeth brightened, hair polished"},
+          photoshop:{l:"Estilo Photoshop",d:"Tira espinhas, manchas e vermelhidão. Pele uniforme, com poros. Rosto igual.",p:"professional Photoshop-style portrait retouch: remove pimples, acne, blackheads, blemishes, dark spots and redness, even out the skin tone, soften under-eye circles, reduce oily shine, tame stray flyaway hairs; keep real skin texture and pores (frequency-separation look, no blur, no plastic skin), keep permanent moles and freckles, and do not reshape any facial feature"},
           natural:{l:"Natural",d:"Mantém textura, pintas e marcas. Recomendado.",p:"natural retouch only: keep real skin texture, pores, freckles and marks; just even out lighting and color"},
           leve:{l:"Leve",d:"Tira o brilho e suaviza olheiras.",p:"light retouch: reduce shine and soften under-eye shadows slightly, keep real skin texture"},
           nenhum:{l:"Nenhum",d:"Pele exatamente como está.",p:"no skin retouching at all"}}},
@@ -1489,16 +1490,19 @@ function personPrompt(s){
 }
 /* Retoque estilo Photoshop: edita a foto anexada, não cria uma nova */
 function retouchPrompt(s,x){
-  const sepNeg=s.ai==="leonardo"||s.ai==="ideogram";
-  const lvl=s.pRetouch==="photoshop"||!G.pRetouch.opts[s.pRetouch]
-    ?`remove pimples, acne, blackheads, blemishes, dark spots, small scars from acne and redness; even out blotchy or uneven skin tone; soften dark under-eye circles and bags slightly; reduce oily shine on the forehead, nose and cheeks; tame stray flyaway hairs; slightly brighten the whites of the eyes and the teeth, naturally`
+  const sepNeg=s.ai==="leonardo"||s.ai==="ideogram", forte=s.pRetouch==="photoshopForte";
+  const lvl=forte?G.pRetouch.opts.photoshopForte.p
+    :(s.pRetouch==="photoshop"||!G.pRetouch.opts[s.pRetouch])
+    ?`remove every pimple, acne mark, blackhead, blemish, dark spot and red patch; make the skin tone clean and even on the whole face, neck and shoulders; clearly reduce dark under-eye circles and bags; remove oily shine on forehead, nose and cheeks; smooth the skin moderately while keeping fine natural texture; tidy flyaway hairs; brighten the whites of the eyes and the teeth`
     :G.pRetouch.opts[s.pRetouch].p;
-  const avoid=["plastic or airbrushed skin","beauty filter look","blurred skin without pores","face reshaping","slimming the face or body","bigger eyes","changing the nose, lips or jaw","changing makeup","changing age","changing skin color","new background","new clothes","cropping or reframing"].concat(x.wantText?["extra or garbled text"]:["text","watermarks"]);
-  const P=[`EDIT the attached photo. This is a retouch of the same photo, not a new photo. Work like a professional retoucher in Photoshop.`,
-    `KEEP EXACTLY THE SAME: the person's identity, face shape, eyes, eyebrows, nose, mouth, lips, jawline, ears and facial proportions; age; expression; natural skin color; hair; body; clothing; pose; background; framing and crop. Anyone who knows this person must recognize the photo as the original, just cleaner.`,
+  const avoid=["a result that looks the same as the original","plastic or waxy skin","blurry skin","face reshaping","slimming the face or body","bigger eyes","changing the nose, lips or jaw","changing age","changing skin color","new background","new clothes","cropping or reframing"].concat(x.wantText?["extra or garbled text"]:["text","watermarks"]);
+  const P=[`EDIT the attached photo as a ${forte?"high-end magazine":"professional"} Photoshop retouch. This is the same photo improved, not a new photo. The improvement must be clearly visible when the before and after are placed side by side.`,
+    `WHO: retouch every person in the photo, all faces equally.`,
+    `KEEP EXACTLY THE SAME: each person's identity, face shape, eyes, eyebrows, nose, mouth, lips, jawline, ears and facial proportions; age; expression; natural skin color; hairstyle; body; clothing; pose; background scene; framing and crop.`,
     `SKIN RETOUCH: ${lvl}.`,
-    `KEEP REAL SKIN: keep the natural skin texture and visible pores, like a frequency-separation retouch. Keep permanent moles, freckles and birthmarks that are part of the person's look. No smoothing blur.`,
-    `FINISH: subtle dodge and burn for natural depth, balanced exposure, natural color correction and white balance, gentle sharpening on the eyes and hair. Same aspect ratio as the original, full resolution.`];
+    forte?`SKIN LOOK: polished, luminous and flawless, like a beauty campaign, but still real skin, not plastic.`:`SKIN LOOK: clean and smooth, with fine natural pores still visible. Keep moles and tattoos.`,
+    `PHOTO FIX: remove digital noise and grain from the low light, recover detail and sharpness like a photo from a professional camera, correct the white balance and remove any orange or green color cast, lift the shadows on the faces, add soft even light on the faces as if a soft beauty light was used, balanced contrast, ${forte?"rich vibrant":"natural, pleasant"} colors.`,
+    `FINISH: dodge and burn to sculpt the faces naturally, crisp eyes and eyelashes, polished hair with shine. Same aspect ratio as the original, high resolution.`];
   if(x.wantText)P.push(...textLines(s,x));
   if(!sepNeg)P.push(`AVOID: ${avoid.join(", ")}.`);
   return {p:P.join("\n"),neg:sepNeg?avoid.join(", "):""};
@@ -1520,8 +1524,9 @@ function pChecks(s){
   if(s.pGoal==="photoshop"){
     if(s.ai==="midjourney"||s.ai==="ideogram"||s.ai==="leonardo")C.push(["crit","Retoque da foto real só funciona em IA que edita a foto anexada. Use Gemini ou ChatGPT. Essa IA cria outra pessoa parecida."]);
     else C.push(["ok","Retoque estilo Photoshop: a IA edita a sua foto, sem trocar roupa, fundo nem enquadramento. Confira se o rosto ficou igual antes de usar."]);
-    if(s.pRetouch==="nenhum")C.push(["warn","Objetivo é retoque, mas a pele está em “Nenhum”. Troque para Estilo Photoshop."]);
-    C.push(["ok","Se a pele ficar lisa demais, peça na mesma conversa: “volte a textura natural da pele, com poros”."]);
+    if(s.pRetouch==="nenhum"||s.pRetouch==="natural"||s.pRetouch==="leve")C.push(["warn",`Objetivo é retoque estilo Photoshop, mas a pele está em “${G.pRetouch.opts[s.pRetouch].l}”. A diferença vai ser pequena. Use Estilo Photoshop ou Photoshop forte.`]);
+    C.push(["ok","Achou que mudou pouco? Use “Photoshop forte” ou peça na mesma conversa: “aumente o retoque: pele mais lisa e iluminada, tire o ruído e deixe a foto mais nítida, sem mudar o rosto”."]);
+    C.push(["ok","Se a pele ficar lisa demais, peça: “volte um pouco da textura natural da pele, com poros”."]);
     C.push(...textChecks(s,true));
     return C;
   }
